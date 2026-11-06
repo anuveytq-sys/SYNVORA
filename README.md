@@ -98,3 +98,14 @@ MIT. See LICENSE.
 CIVICLENS includes category-based barrier reporting, optional GPS, local verification status, duplicate suppression (same category within 30 metres and 24 hours), OpenStreetMap discovery, report dashboard, hotspot/missing-infrastructure summaries, an accessibility-debt indicator, and rule-based inspection-priority estimates. Community report synchronization is intentionally not included. Reports remain private on the current device and can be exported as JSON; no account, cloud database, API key or paid service is required.
 
 The debt index and inspection-priority ranking are transparent heuristics, not validated public accessibility ratings or trained predictions. Automated camera-based barrier classification is not included because the available general-object model produced unreliable labels.
+
+
+## Stage 5 — SYNVORA CORE (unified ecosystem)
+
+- Unified dashboard links ECHO, CIVICLENS, FORMGENIUS and TERRAIN AI, with live module-status summaries.
+- Local rule-based workflow orchestrator selects relevant module adapters and combines their currently available summaries. A public-office preparation workflow can combine ECHO scene/sign observations, CIVICLENS mapped infrastructure summaries, FORMGENIUS document-review status and TERRAIN AI's limited visual-variation summary.
+- Unified accessibility preferences for profile, language, text size, contrast, spoken summaries and simplified explanations, synchronized with ECHO's existing settings and saved locally.
+- Multimodal hand-offs to existing ECHO camera/image input, FORMGENIUS document input, and optional browser speech input/output. Files remain handled by their original module.
+- Optional shared local IndexedDB workspace with explicit opt-in, export and clear controls. It stores privacy-filtered module summaries only. It does not store camera images, OCR contents, document field values, report notes or precise coordinates. Existing module storage remains separate.
+- Responsive animated interface, keyboard and screen-reader semantics, reduced-motion support and high-contrast styling.
+- CORE is a transparent deterministic coordinator, not a hosted multi-agent LLM. It does not fabricate missing module results, certify routes, verify accessibility, or provide safety guarantees. CIVICLENS community records and all model outputs require independent checking.
