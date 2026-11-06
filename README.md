@@ -62,7 +62,7 @@ Run npm test. The test checks JavaScript syntax and verifies Stage 1, Stage 2, l
 1. **ECHO — Perception:** camera/image understanding, OCR, voice interaction and accessibility settings.
 2. **CIVICLENS — Civic accessibility:** map and report public accessibility barriers and accessible infrastructure. (Implemented; private reports are local-only and exportable)
 3. **FORMGENIUS — Documents and services:** explain forms, extract fields and guide users through service workflows.
-4. **TERRAIN AI — Environment awareness:** terrain context, hazard awareness and accessible route intelligence.
+4. **TERRAIN AI — Environment awareness:** experimental relative-depth visual awareness and uncertainty cues only; not route or foothold guidance.
 5. **CORE — Unified ecosystem:** connect the modules through a coordinated, privacy-conscious platform.
 
 ## License
