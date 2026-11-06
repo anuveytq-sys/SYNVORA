@@ -11,10 +11,32 @@ function store(k,v){try{localStorage.setItem("synvora-"+k,String(v))}catch(e){}}
 function read(k,d){try{return localStorage.getItem("synvora-"+k)??d}catch(e){return d}}
 function applyLanguage(){document.documentElement.lang=S.lang==="hi-IN"?"hi":"en";document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.dataset.i18n;if(D[S.lang][k])el.textContent=t(k)});$("camera-start").textContent=S.stream?t("stopCamera"):t("startCamera");$("analyze").textContent=t("analyze");$("run-ocr").textContent=t("extract");$("image-question").placeholder=t("questionPlaceholder")}
 function speak(text){if(!("speechSynthesis"in window)){$("voice-status").textContent=t("speechUnsupported");return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=S.lang;const vs=speechSynthesis.getVoices();u.voice=vs.find(v=>v.lang.toLowerCase()===S.lang.toLowerCase())||vs.find(v=>v.lang.toLowerCase().startsWith(S.lang.slice(0,2)))||null;speechSynthesis.speak(u)}
-async function loadModel(){try{if(!window.cocoSsd)throw Error("CDN unavailable");S.model=await cocoSsd.load({base:"lite_mobilenet_v2"});$("model-status").textContent=t("ready")}catch(e){$("model-status").textContent=t("modelError")}}
+const SCRIPT_CACHE=new Map();
+function loadScript(src,ready){
+ if(ready())return Promise.resolve();
+ if(SCRIPT_CACHE.has(src))return SCRIPT_CACHE.get(src);
+ const task=new Promise((resolve,reject)=>{
+  const script=document.createElement("script");script.src=src;script.async=true;
+  const timer=setTimeout(()=>{script.remove();reject(Error("Timed out loading "+src))},25000);
+  script.onload=()=>{clearTimeout(timer);ready()?resolve():reject(Error("Library did not initialize"))};
+  script.onerror=()=>{clearTimeout(timer);script.remove();reject(Error("Could not load "+src))};
+  document.head.append(script);
+ });
+ SCRIPT_CACHE.set(src,task);task.catch(()=>SCRIPT_CACHE.delete(src));return task;
+}
+async function loadModel(){
+ if(S.model)return S.model;
+ $("model-status").textContent="LOADING OBJECT MODEL…";
+ try{
+  await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js",()=>!!window.tf);
+  await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js",()=>!!window.cocoSsd);
+  S.model=await cocoSsd.load({base:"lite_mobilenet_v2"});
+  $("model-status").textContent=t("ready");return S.model;
+ }catch(e){$("model-status").textContent=t("modelError")+" · "+(e.message||"");throw e}
+}
 function resetResults(){S.accessibilityResults=[];S.accessibilityScanDone=false;$("accessibility-results").textContent=t("accessibilityNotRun");$("accessibility-scan").disabled=!S.image;$("detections").innerHTML="<li>"+t("noAnalysis")+"</li>";$("scene-summary").textContent=t("summaryPrompt")||"Your scene summary will appear here.";$("ocr-output").textContent="Extracted text will appear here.";S.detections=[];S.text=""}
 function stopCamera(){if(S.stream)S.stream.getTracks().forEach(x=>x.stop());S.stream=null;S.video=null;$("capture").disabled=true;$("camera-start").textContent=t("startCamera")}
-function showImage(img){S.image=img;img.alt=S.lang==="hi-IN"?"विश्लेषण के लिए चुनी गई तस्वीर":"Selected image for analysis";img.style.maxWidth="100%";img.style.maxHeight="440px";img.style.objectFit="contain";$("viewer").replaceChildren(img);$("input-state").textContent=S.lang==="hi-IN"?"तस्वीर तैयार":"IMAGE READY";$("analyze").disabled=false;resetResults();$("accessibility-scan").disabled=false}
+function showImage(img){stopCamera();S.image=img;img.alt=S.lang==="hi-IN"?"विश्लेषण के लिए चुनी गई तस्वीर":"Selected image for analysis";img.style.maxWidth="100%";img.style.maxHeight="440px";img.style.objectFit="contain";$("viewer").replaceChildren(img);$("input-state").textContent=S.lang==="hi-IN"?"तस्वीर तैयार":"IMAGE READY";$("analyze").disabled=false;resetResults();$("accessibility-scan").disabled=false}
 function safe(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 $("image-upload").addEventListener("change",e=>{const f=e.target.files?.[0];if(!f||!f.type.startsWith("image/"))return;const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{showImage(im);URL.revokeObjectURL(u)};im.onerror=()=>URL.revokeObjectURL(u);im.src=u});
 $("camera-start").addEventListener("click",async()=>{if(S.stream){stopCamera();return}if(!navigator.mediaDevices?.getUserMedia){$("voice-status").textContent=t("cameraError")+"getUserMedia unsupported";return}try{S.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});const v=document.createElement("video");v.autoplay=true;v.playsInline=true;v.muted=true;v.srcObject=S.stream;await v.play();S.video=v;$("viewer").replaceChildren(v);$("capture").disabled=false;$("camera-start").textContent=t("stopCamera");$("input-state").textContent="CAMERA LIVE"}catch(e){stopCamera();$("voice-status").textContent=t("cameraError")+(e.message||"permission denied")}});
@@ -53,7 +75,14 @@ $("accessibility-scan").addEventListener("click",async()=>{
  }catch(e){$("accessibility-results").textContent=t("accessibilityModelFailed")+" "+(e.message||"")}
  finally{b.disabled=!S.image;b.textContent=t("accessibilityScan")}
 });
-async function worker(){if(S.ocrWorker)return S.ocrWorker;if(!window.Tesseract)throw Error("Tesseract unavailable");S.ocrWorker=await Tesseract.createWorker(S.lang==="hi-IN"?"eng+hin":"eng",1,{logger:m=>{if(m.status==="recognizing text")$("ocr-output").textContent=Math.round((m.progress||0)*100)+"%"}});return S.ocrWorker}
+async function worker(){
+ if(S.ocrWorker)return S.ocrWorker;
+ await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js",()=>!!window.Tesseract);
+ S.ocrWorker=await Tesseract.createWorker(S.lang==="hi-IN"?"eng+hin":"eng",1,{logger:m=>{
+  if(m.status==="recognizing text")$("ocr-output").textContent=Math.round((m.progress||0)*100)+"%";
+ }});
+ return S.ocrWorker;
+}
 $("run-ocr").addEventListener("click",async()=>{if(!S.image||!window.Tesseract){$("ocr-output").textContent=t("ocrUnavailable");return}$("run-ocr").disabled=true;$("run-ocr").textContent=t("extracting");try{const w=await worker(),r=await w.recognize(S.image);S.text=(r.data.text||"").trim();$("ocr-output").textContent=S.text?S.text+"\n\nConfidence: "+Math.round(r.data.confidence||0)+"%":t("ocrNone")}catch(e){$("ocr-output").textContent=t("ocrFail")}finally{$("run-ocr").disabled=false;$("run-ocr").textContent=t("extract")}});
 $("read-text").addEventListener("click",()=>speak(S.text||t("readNone")));
 $("question-form").addEventListener("submit",e=>{e.preventDefault();const q=$("image-question").value.trim().toLowerCase();if(!S.image){$("answer").textContent=t("needImage");return}if(/text|read|written|sign|word|लिख|पढ़|शब्द|बोर्ड/.test(q))$("answer").textContent=S.text?t("textAnswer")+S.text:t("noText");else if(/stairs|steps|ramp|door|exit|obstacle|safe|danger|path|route|सीढ़|रैंप|दरवाज़|दरवाज|रास्त|बाधा|निकास/.test(q)){if(!S.accessibilityScanDone){$("answer").textContent=t("runAccessibilityFirst")}else{const hits=S.accessibilityResults.filter(d=>q.split(/[^a-z]+/).some(w=>w.length>2&&d.label.toLowerCase().includes(w))||(/stairs|steps|सीढ़/.test(q)&&/stairs|staircase|steps/.test(d.label))||(/ramp|रैंप/.test(q)&&/ramp/.test(d.label))||(/door|दरवाज़|दरवाज/.test(q)&&/door/.test(d.label))||(/obstacle|बाधा/.test(q)&&/obstacle|barrier|pothole|curb/.test(d.label)));$("answer").textContent=hits.length?t("candidateMatches")+" "+hits.map(d=>d.label+" ("+Math.round(d.score*100)+"%)").join(", ")+". "+t("uncertain"):t("noCandidateNotProof")}}else if(S.detections.length)$("answer").textContent=t("objectAnswer")+S.detections.map(d=>d.class).join(", ")+". "+t("uncertain");else $("answer").textContent=t("notEnough")});
@@ -72,5 +101,22 @@ $("settings-close").addEventListener("click",()=>{$("settings-panel").hidden=tru
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("settings-panel").hidden)$("settings-close").click()});
 window.addEventListener("pagehide",()=>{stopCamera();if(S.ocrWorker)S.ocrWorker.terminate();if(window.speechSynthesis)speechSynthesis.cancel()});
 function restore(){S.lang=read("language","en-US");$("language").value=S.lang;$("profile").value=read("profile","standard");$("text-size").value=read("text-size","1");document.documentElement.style.fontSize=(16*Number($("text-size").value))+"px";$("contrast").checked=read("contrast","false")==="true";document.body.classList.toggle("high-contrast",$("contrast").checked);$("reduce-motion").checked=read("reduce-motion","false")==="true";document.body.classList.toggle("reduce-motion",$("reduce-motion").checked);$("keyboard-mode").checked=read("keyboard-mode","false")==="true";document.body.classList.toggle("keyboard-mode",$("keyboard-mode").checked);applyProfile($("profile").value);applyLanguage()}
-restore();loadModel();
+restore();
+function setupReveal(){
+ const revealables=[...document.querySelectorAll(".intro,.work-grid > .card,.assistant-card,.profile-card")];
+ revealables.forEach((el,i)=>{el.classList.add("reveal-panel");el.style.setProperty("--reveal-delay",Math.min(i,5)*90+"ms")});
+ if(!("IntersectionObserver"in window)){revealables.forEach(el=>el.classList.add("is-visible"));return}
+ const observer=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add("is-visible");observer.unobserve(entry.target)}});
+ },{threshold:.12,rootMargin:"0px 0px -5% 0px"});
+ revealables.forEach(el=>observer.observe(el));
+}
+setupReveal();
+window.addEventListener("error",e=>{
+ const msg=e.message||"Unexpected application error";
+ const status=$("model-status");if(status)status.textContent="APP ERROR · "+msg.slice(0,90);
+});
+window.addEventListener("unhandledrejection",e=>{
+ const status=$("voice-status");if(status)status.textContent="A feature could not finish: "+String(e.reason?.message||e.reason||"unknown error");
+});
 })();

@@ -3,12 +3,10 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f">
 <meta name="description" content="SYNVORA ECHO accessible visual perception workspace"><title>SYNVORA — ECHO</title>
 <link rel="stylesheet" href="./styles.css">
-<script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script defer src="./app.js"></script></head><body>
+<script defer src="./app.js"></script></head><body>
 <a class="skip-link" href="#workspace" data-i18n="skip">Skip to workspace</a>
-<header class="topbar"><a class="brand" href="./"><span class="brand-mark">S</span><span>SYNVORA<small>ACCESSIBILITY INTELLIGENCE</small></span></a>
-<div class="top-actions"><span class="status" id="model-status" role="status" aria-live="polite" data-i18n="loading">AI models loading…</span><button id="settings-toggle" class="icon-button" aria-expanded="false" aria-controls="settings-panel" aria-label="Open quick settings">☷</button></div></header>
+<header class="topbar" role="banner"><a class="brand" href="./"><span class="brand-mark">S</span><span>SYNVORA<small>ACCESSIBILITY INTELLIGENCE</small></span></a>
+<div class="top-actions"><span class="status" id="model-status" role="status" aria-live="polite">ECHO READY · MODELS LOAD ON DEMAND</span><button id="settings-toggle" class="icon-button" aria-expanded="false" aria-controls="settings-panel" aria-label="Open quick settings">☷</button></div></header>
 <main id="workspace" class="layout"><section class="intro"><div class="eyebrow">STAGE 01 / ECHO PERCEPTION</div><h1 data-i18n="headline">See beyond the frame.</h1><p data-i18n="intro">ECHO helps explore an image or camera view with object labels, readable text and voice controls. Results are assistive clues, not navigation instructions.</p></section>
 <section class="work-grid"><section class="card"><div class="card-head"><div><div class="eyebrow" data-i18n="liveInput">LIVE INPUT</div><h2 data-i18n="scanner">Visual scanner</h2></div><span class="pill" id="input-state" data-i18n="noInput">NO INPUT</span></div>
 <div class="viewer" id="viewer"><div class="empty-state"><div class="scan-icon">◎</div><strong data-i18n="workspace">Your visual workspace</strong><span data-i18n="startPrompt">Start the camera or upload an image to begin.</span></div></div>
