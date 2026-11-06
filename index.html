@@ -69,7 +69,7 @@
 </section>
 <section class="card terrain-card terrain-reveal" id="terrain-ai" aria-labelledby="terrain-title">
  <div class="card-head"><div><div class="eyebrow">TERRAIN AI · IMAGE ANALYSIS</div><h2 id="terrain-title">Surface & environment lab</h2></div><span class="pill" id="terrain-state">AWAITING IMAGE</span></div>
- <p class="muted">Analyze an uploaded image or a frame captured in ECHO. The overlay highlights visual texture and contrast variation for research and accessibility observations. It does not assess ground strength, traction, depth, stability or safe routes.</p>
+ <p class="muted">Analyze an uploaded image or a frame captured in ECHO. The overlay highlights visual texture and contrast variation for research and accessibility observations. It does not assess ground strength, traction, depth, stability or safe routes. It cannot locate your leg, predict a fall, identify a dangerous next step, or mark a safe green place to move. Do not use it to decide where to put your feet.</p>
  <div class="terrain-inputs">
   <label class="terrain-upload" for="terrain-file"><span>＋</span><strong>Upload terrain image</strong><small>JPG, PNG, WEBP · up to 12 MB</small></label><input id="terrain-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
   <button id="terrain-use-echo" type="button" disabled>Use latest ECHO capture</button><button id="terrain-analyze" class="primary" type="button" disabled>Analyze surface image</button><button id="terrain-clear" type="button">Clear</button>
@@ -83,7 +83,7 @@
 </section>
 <section class="card live-object-card terrain-reveal" id="live-route" aria-labelledby="route-title">
  <div class="card-head"><div><div class="eyebrow">ECHO EXTENSION · LIVE OBJECT CAMERA</div><h2 id="route-title">Live object detection</h2></div><span class="pill" id="route-state">CAMERA OFF</span></div>
- <p class="muted">A separate live camera that labels supported everyday objects. It is not the terrain image analyzer and does not provide navigation or safety judgments.</p>
+ <p class="muted">A separate live camera that labels supported everyday objects. Its lightweight COCO-SSD model has a limited fixed vocabulary and does not include reliable labels for doors or wardrobes/almirahs. A “bed” prediction is shown as a tentative large-indoor-object guess, not a confirmed identification. Confidence is not accuracy. It is not the terrain image analyzer and does not provide navigation or safety judgments.</p>
  <div class="route-viewer" id="route-viewer"><video id="route-video" autoplay muted playsinline hidden></video><canvas id="route-overlay" hidden></canvas><div class="route-empty" id="route-empty">LIVE OBJECT CAMERA · OFF</div></div>
  <div class="controls"><button class="primary" id="route-start">Start live object camera</button><button id="route-stop" disabled>Stop camera</button><label class="check-label"><input id="route-voice" type="checkbox"><span>Optional spoken object labels</span></label></div>
  <div class="route-metrics"><div><strong id="route-model-state">NOT LOADED</strong><span>Detector</span></div><div><strong id="route-fps">—</strong><span>Analysis time</span></div><div><strong id="route-zones">—</strong><span>Objects detected</span></div></div>
