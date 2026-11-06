@@ -68,3 +68,9 @@ Run npm test. The test checks JavaScript syntax and verifies that required Stage
 ## License
 
 MIT. See LICENSE.
+
+### CIVICLENS Stage 2 completion notes
+
+CIVICLENS includes a live OWL-ViT visual candidate scanner, category-based barrier reporting, optional GPS and camera-frame evidence, local verification status, duplicate suppression (same category within 30 metres and 24 hours), OpenStreetMap discovery, report dashboard, hotspot/missing-infrastructure summaries, an accessibility-debt indicator, and rule-based inspection-priority estimates. Optional Supabase community sync is implemented but requires the repository owner to provision a project, run `backend/supabase-schema.sql`, and configure the project URL/public anon key plus a signed-in account. No service-role key is used or required in the browser. Until configured, reports remain local to the device and can be exported.
+
+The debt index and inspection-priority ranking are transparent heuristics, not validated public accessibility ratings or trained predictions. AI camera detections are candidates only and must be reviewed. No camera scan can establish path safety.

@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f">
 <meta name="description" content="SYNVORA ECHO accessible visual perception workspace"><title>SYNVORA — ECHO</title>
 <link rel="stylesheet" href="./styles.css">
-<script defer src="./app.js"></script><script defer src="./civiclens.js"></script><script defer src="./live-route.js"></script></head><body>
+<script defer src="./app.js"></script><script defer src="./civiclens.js"></script><script defer src="./live-route.js"></script><script defer src="./civic-ai.js"></script><script defer src="./civic-cloud.js"></script></head><body>
 <a class="skip-link" href="#workspace" data-i18n="skip">Skip to workspace</a>
 <header class="topbar" role="banner"><a class="brand" href="./"><span class="brand-mark">S</span><span>SYNVORA<small>ACCESSIBILITY INTELLIGENCE</small></span></a>
 <div class="top-actions"><span class="status" id="model-status" role="status" aria-live="polite">ECHO READY · MODELS LOAD ON DEMAND</span><button id="settings-toggle" class="icon-button" aria-expanded="false" aria-controls="settings-panel" aria-label="Open quick settings">☷</button></div></header>
@@ -35,6 +35,35 @@
 <section class="card civic-card reveal-panel" id="civiclens" aria-labelledby="civic-title">
  <div class="card-head"><div><div class="eyebrow">STAGE 02 / CIVICLENS</div><h2 id="civic-title">Civic accessibility explorer</h2></div><span class="pill" id="civic-state">MAP READY</span></div>
  <p class="muted">Explore OpenStreetMap accessibility tags, inspect mapped public infrastructure and keep private observations of barriers. Map records are community-contributed and may be incomplete or outdated.</p>
+ 
+ <section class="civic-ai card" id="civic-ai">
+  <div class="card-head"><div><div class="eyebrow">LIVE CIVIC PERCEPTION</div><h3>Continuous accessibility scanner</h3></div><span class="pill" id="civic-ai-state">CAMERA OFF</span></div>
+  <p class="muted small">The camera stream is analyzed continuously in this browser for possible footpath damage, missing ramps, blocked paths, uneven surfaces, stairs-only entrances and accessible features. AI matches are unverified candidates; review them before reporting.</p>
+  <div class="civic-ai-view"><video id="civic-ai-video" autoplay muted playsinline aria-label="Live civic accessibility camera"></video><canvas id="civic-ai-overlay" aria-hidden="true"></canvas><div id="civic-ai-empty">Start the live scanner to analyze the current camera view.</div></div>
+  <div class="controls"><button class="primary" id="civic-ai-start">Start live accessibility scan</button><button id="civic-ai-stop" disabled>Stop scan</button><button id="civic-ai-once" disabled>Scan current frame</button></div>
+  <p id="civic-ai-status" class="civic-status" role="status" aria-live="polite">Camera is off; no frames are being analyzed.</p>
+  <div id="civic-ai-findings" class="civic-ai-findings"><span class="muted">No AI findings yet.</span></div>
+  <button id="civic-ai-report" disabled>Use selected finding in report form</button>
+ </section>
+ <section class="civic-dashboard card" id="civic-dashboard">
+  <div class="card-head"><div><div class="eyebrow">CIVIC INTELLIGENCE</div><h3>Accessibility dashboard</h3></div><span class="pill">LOCAL + SYNCED REPORTS</span></div>
+  <div class="civic-metrics">
+   <div><strong id="civic-metric-total">0</strong><span>Total reports</span></div><div><strong id="civic-metric-open">0</strong><span>Unresolved</span></div><div><strong id="civic-metric-sites">0</strong><span>Buildings / places</span></div><div><strong id="civic-metric-debt">0</strong><span>Accessibility debt index</span></div>
+  </div>
+  <div class="civic-dashboard-grid"><div><h4>Hotspots & missing infrastructure</h4><div id="civic-hotspot-list" class="muted small">No report clusters yet.</div></div><div><h4>Inspection priority analytics</h4><p class="muted small">Rule-based triage from severity, frequency and report age; this is not a trained predictive model.</p><div id="civic-priority-list" class="muted small">No priorities yet.</div></div></div>
+  <div class="civic-form-actions"><button id="civic-cloud-sync">Sync community reports</button><span id="civic-cloud-status" class="muted small" role="status" aria-live="polite">Cloud sharing is optional and requires your own Supabase project.</span></div>
+ </section>
+ <details class="civic-backend card"><summary>Configure community backend (Supabase)</summary>
+  <p class="muted small">Create a Supabase project and run <code>backend/supabase-schema.sql</code> in its SQL editor. Enter the project URL and public anon key, then create/sign in to an account. Never use a service-role key in this browser app.</p>
+  <div class="civic-backend-grid">
+   <label>Project URL<input id="civic-supabase-url" type="url" placeholder="https://your-project.supabase.co"></label>
+   <label>Public anon key<input id="civic-supabase-key" type="password" autocomplete="off"></label>
+   <label>Email<input id="civic-supabase-email" type="email" autocomplete="email"></label>
+   <label>Password<input id="civic-supabase-password" type="password" autocomplete="current-password"></label>
+  </div>
+  <div class="controls"><button id="civic-backend-test">Test connection</button><button id="civic-backend-signup">Create account</button><button id="civic-backend-signin">Sign in</button><button id="civic-backend-signout">Sign out</button></div>
+ </details>
+
  <div class="civic-toolbar">
   <button class="primary" id="civic-location">Use my location</button>
   <label class="civic-search-label" for="civic-search">Find a place</label><input id="civic-search" type="search" placeholder="Search a town, street or landmark">
@@ -46,6 +75,7 @@
   <label><input type="checkbox" data-civic-filter="access" checked> Wheelchair access</label><label><input type="checkbox" data-civic-filter="crossing" checked> Crossings</label><label><input type="checkbox" data-civic-filter="tactile" checked> Tactile paving</label><label><input type="checkbox" data-civic-filter="ramp" checked> Ramps</label><label><input type="checkbox" data-civic-filter="toilet" checked> Accessible toilets</label><label><input type="checkbox" data-civic-filter="lift" checked> Lifts</label><label><input type="checkbox" data-civic-filter="rest" checked> Rest points</label><label><input type="checkbox" data-civic-filter="parking" checked> Parking</label>
  </div>
  <div id="civic-map" class="civic-map" role="application" aria-label="Interactive accessibility map"></div>
+ <div class="civic-legend"><span><i class="legend-dot accessible"></i> Verified accessible feature</span><span><i class="legend-dot barrier"></i> Confirmed barrier</span><span><i class="legend-dot pending"></i> Unverified report</span></div>
  <div class="civic-meta"><span id="civic-status" role="status" aria-live="polite">Choose Use my location or search for a place to load nearby mapped features.</span><span>Data: OpenStreetMap contributors · © OpenStreetMap</span></div>
  <div class="civic-columns">
   <section class="result-block"><div class="inline-head"><h3>Mapped infrastructure</h3><span id="civic-count" class="pill">0 FEATURES</span></div><ul id="civic-results" class="civic-results"><li class="muted">No area loaded yet.</li></ul></section>
@@ -56,6 +86,7 @@
   <p class="muted small">Choose a point on the map or use your current location. Reports stay in this browser until you export them; they are not automatically published or sent to a server.</p>
   <div class="civic-report-grid">
    <label>Barrier type<select id="civic-report-type"><option value="blocked_path">Blocked path</option><option value="missing_ramp">Missing / unusable ramp</option><option value="broken_surface">Broken or uneven surface</option><option value="unsafe_crossing">Difficult crossing</option><option value="missing_tactile">Missing tactile guidance</option><option value="inaccessible_facility">Inaccessible facility</option><option value="other">Other barrier</option></select></label>
+   <label>Building / place<input id="civic-report-site" maxlength="120" placeholder="Building, station, crossing or facility"></label>
    <label>Impact<select id="civic-report-impact"><option value="unknown">Not assessed</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
    <label class="civic-notes">What did you observe?<textarea id="civic-report-notes" rows="3" maxlength="500" placeholder="Describe only what you observed. Avoid personal information."></textarea></label>
   </div>

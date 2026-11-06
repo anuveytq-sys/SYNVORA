@@ -23,6 +23,8 @@ jobs:
           test -s styles.css
           test -s app.js
           test -s civiclens.js
+          test -s civic-ai.js
+          test -s civic-cloud.js
           test -s live-route.js
           npm test
       - name: Upload Pages artifact
