@@ -48,15 +48,17 @@ $("camera-start").addEventListener("click",async()=>{if(S.stream){stopCamera();r
 $("capture").addEventListener("click",()=>{if(!S.video?.videoWidth)return;const c=document.createElement("canvas");c.width=S.video.videoWidth;c.height=S.video.videoHeight;c.getContext("2d").drawImage(S.video,0,0);const im=new Image();im.onload=()=>showImage(im);im.src=c.toDataURL("image/jpeg",.92)});
 $("analyze").addEventListener("click",async()=>{if(!S.image)return;$("analyze").disabled=true;$("analyze").textContent=t("analyzing");try{if(!S.model)await loadModel();if(!S.model)throw Error("Object model unavailable");S.detections=await S.model.detect(S.image);const list=$("detections");list.replaceChildren();if(!S.detections.length){list.textContent=t("noObjects");$("scene-summary").textContent=t("noObjects")+" "+t("uncertain");return}S.detections.sort((a,b)=>b.score-a.score).forEach(d=>{const li=document.createElement("li");li.innerHTML="<strong>"+safe(d.class)+"</strong> — "+Math.round(d.score*100)+"%";list.append(li)});$("scene-summary").textContent=t("scenePrefix")+" "+S.detections.length+" "+t("objectTypes")+" "+S.detections.map(d=>d.class).join(", ")+". "+t("uncertain")}catch(e){$("scene-summary").textContent="Analysis could not complete: "+e.message}finally{$("analyze").disabled=false;$("analyze").textContent=t("analyze")}});
 
-const ACCESSIBILITY_LABELS=["stairs","staircase","steps","ramp","wheelchair ramp","curb ramp","door","doorway","open doorway","obstacle","pothole","curb","sidewalk","pavement","tactile paving","handrail","railing","crosswalk","pedestrian crossing","wheelchair","person","bicycle","car","barrier"];
 async function loadAccessibilityDetector(){
  if(S.accessibilityDetector)return S.accessibilityDetector;
  await window.SYNVORA_MODELS?.activate("echo-accessibility");
  $("accessibility-scan-status").textContent=t("loadingAccessibilityModel");
  try{
-  const {pipeline}=await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1");
-  S.accessibilityDetector=await pipeline("zero-shot-object-detection","Xenova/owlvit-base-patch32",{dtype:"q8"});
-  $("accessibility-scan-status").textContent=t("accessibilityModelReady");
+  await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js",()=>!!window.tf);
+  await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js",()=>!!window.cocoSsd);
+  try{await tf.setBackend("webgl")}catch(e){}
+  await tf.ready();
+  S.accessibilityDetector=await cocoSsd.load({base:"lite_mobilenet_v2"});
+  $("accessibility-scan-status").textContent="Lightweight object detector ready. It reports common objects, not accessibility features.";
   return S.accessibilityDetector;
  }catch(e){$("accessibility-scan-status").textContent=t("accessibilityModelFailed")+" "+(e.message||"");throw e}
 }
@@ -65,19 +67,18 @@ $("accessibility-scan").addEventListener("click",async()=>{
  const b=$("accessibility-scan");b.disabled=true;b.textContent=t("scanningAccessibility");
  try{
   const detector=await loadAccessibilityDetector();
-  const output=await detector(S.image,ACCESSIBILITY_LABELS,{threshold:0.08,top_k:24});
-  const best=new Map();
-  for(const item of output||[]){const key=String(item.label||"").toLowerCase();if(!best.has(key)||best.get(key).score<item.score)best.set(key,item)}
-  S.accessibilityResults=[...best.values()].sort((a,b)=>b.score-a.score);
+  const output=await detector.detect(S.image,20,.25);
+  S.accessibilityResults=(output||[]).sort((a,b)=>b.score-a.score);
   S.accessibilityScanDone=true;
   const list=$("accessibility-results");list.replaceChildren();
-  if(!S.accessibilityResults.length){list.textContent=t("noAccessibilityCandidates")}
+  if(!S.accessibilityResults.length){list.textContent="No common objects were detected. This does not prove that an accessibility feature or barrier is absent."}
   else S.accessibilityResults.forEach(item=>{
-   const li=document.createElement("li");const box=item.box||{};const cx=((Number(box.xmin||0)+Number(box.xmax||0))/2)/(S.image.naturalWidth||S.image.width||1);const cy=((Number(box.ymin||0)+Number(box.ymax||0))/2)/(S.image.naturalHeight||S.image.height||1);
+   const li=document.createElement("li"),[x,y,w,h]=item.bbox||[0,0,0,0];
+   const cx=(x+w/2)/(S.image.naturalWidth||S.image.width||1),cy=(y+h/2)/(S.image.naturalHeight||S.image.height||1);
    const pos=(cy<.34?t("upper"):cy>.66?t("lower"):t("middle"))+" "+(cx<.34?t("left"):cx>.66?t("right"):t("centre"));
-   li.textContent=item.label+" — "+Math.round(item.score*100)+"% · "+pos;list.append(li);
+   li.textContent=item.class+" — "+Math.round(item.score*100)+"% model confidence · "+pos;list.append(li);
   });
-  $("accessibility-scan-status").textContent=t("accessibilityScanComplete");
+  $("accessibility-scan-status").textContent="Scan complete. Common-object labels only; not an accessibility or safety assessment.";
  }catch(e){$("accessibility-results").textContent=t("accessibilityModelFailed")+" "+(e.message||"")}
  finally{b.disabled=!S.image;b.textContent=t("accessibilityScan")}
 });
