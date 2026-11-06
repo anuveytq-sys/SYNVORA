@@ -120,3 +120,9 @@ body.reduce-motion .route-viewer:before{animation:none}
 @media(prefers-reduced-motion:reduce){.formgenius-reveal,.formgenius-reveal.is-visible,.fg-drop,.fg-progress span{transition:none;transform:none;filter:none;opacity:1}}
 body.reduce-motion .formgenius-reveal,body.reduce-motion .formgenius-reveal.is-visible{transition:none;transform:none;filter:none;opacity:1}
 body.high-contrast .fg-pane,body.high-contrast .fg-field,body.high-contrast .fg-guide-item{background:#000;border:2px solid #fff}
+
+.fg-glossary{margin:18px 0;padding:15px;border:1px solid rgba(100,228,232,.16);border-radius:13px;background:rgba(5,19,32,.62)}
+.fg-explanations{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}
+.fg-explanation{padding:11px;border:1px solid rgba(100,228,232,.13);border-radius:9px;background:#081725}
+.fg-explanation strong{font-size:.78rem;color:#a8f4f5}.fg-explanation p{font-size:.72rem;line-height:1.45;color:var(--muted);margin:6px 0 0}
+@media(max-width:760px){.fg-explanations{grid-template-columns:1fr 1fr}}@media(max-width:480px){.fg-explanations{grid-template-columns:1fr}}
