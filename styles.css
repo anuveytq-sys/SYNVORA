@@ -85,5 +85,4 @@ body.reduce-motion .civic-reveal,body.reduce-motion .civic-reveal.is-visible{opa
 .route-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
 .route-metrics>div{display:grid;gap:5px;padding:12px;border:1px solid rgba(100,228,232,.2);border-radius:10px;background:rgba(5,19,33,.7);min-width:0}
 .route-metrics strong{font-size:.9rem;color:#9cecf0;overflow-wrap:anywhere}.route-metrics span{font-size:.7rem;color:var(--muted)}
-.route-viewer canvas{object-fit:fill}
 @media(max-width:560px){.route-metrics{gap:7px}.route-metrics>div{padding:9px}.route-metrics strong{font-size:.76rem}.route-legend{font-size:.7rem}}
