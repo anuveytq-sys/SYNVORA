@@ -19,6 +19,6 @@ const civicAI=fs.readFileSync("civic-ai.js","utf8");
 const civicCloud=fs.readFileSync("civic-cloud.js","utf8");
 for(const id of ["civic-ai-video","civic-ai-start","civic-ai-stop","civic-ai-report","civic-dashboard","civic-metric-total","civic-hotspot-list","civic-backend-signin","civic-cloud-sync"])assert.ok(html.includes('id="'+id+'"'),"Missing CIVICLENS Stage 2 UI: "+id);
 for(const marker of ["zero-shot-object-detection","Xenova/owlvit-base-patch32","getUserMedia","setInterval","pagehide"])assert.ok(civicAI.includes(marker),"Missing live civic AI scanner feature: "+marker);
-for(const marker of ["/auth/v1/signup","/auth/v1/token?grant_type=password","/rest/v1/civic_reports","created_by","civiclens:reports-updated"])assert.ok(civicCloud.includes(marker),"Missing community backend feature: "+marker);
+for(const marker of ["/auth/v1/signup","/auth/v1/token?grant_type=password","/rest/v1/civic_reports","created_by","civiclens:cloud-updated"])assert.ok(civicCloud.includes(marker),"Missing community backend feature: "+marker);
 for(const marker of ["renderDashboard","verified","duplicate","30 m","24 hours"])assert.ok(civic.includes(marker),"Missing civic reporting/analytics feature: "+marker);
 assert.ok(styles.includes(".civic-ai-view")&&styles.includes(".civic-dashboard-grid"),"CIVICLENS animated panel styling missing");
