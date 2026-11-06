@@ -1,6 +1,6 @@
 # SYNVORA — Universal Accessibility Intelligence Platform
 
-SYNVORA brings together ECHO, CIVICLENS, FORMGENIUS and TERRAIN AI under a shared CORE. This repository ships Stage 1 ECHO, Stage 2 CIVICLENS, and a separate live-camera visual-awareness extension.
+SYNVORA brings together ECHO, CIVICLENS, FORMGENIUS and TERRAIN AI under a shared CORE. This repository ships ECHO perception, CIVICLENS civic accessibility intelligence, FORMGENIUS document intelligence, and a separate live-camera visual-awareness extension.
 
 ## Stage 1 — ECHO
 
@@ -43,6 +43,14 @@ The shipped COCO-SSD model is a general object detector. The optional OWL-ViT sc
 - Draws transient object boxes and labels, optionally announces observations, and releases camera tracks on stop, page hide or tab backgrounding.
 - Frames are not captured as files, persisted or uploaded by this feature. The general detector does not identify ground stability, route clearance, holes, drop-offs, slope, water depth or safe footholds. It is not a route planner or a certified mobility/navigation system; do not use it to choose a path.
 
+## FORMGENIUS — Documents and services
+
+- Reads text-based PDFs with PDF.js and scanned PDFs/images with Tesseract.js English/Hindi OCR, in the browser.
+- Extracts likely application fields (name, date of birth, contact, address, identity/reference labels and related values) into editable review cards.
+- Lets users correct extracted text, edit field values, mark values as reviewed, track review completion, copy data, export JSON, and print a review sheet.
+- Includes generic preparation checklists for education, identity/address, healthcare, accessibility and public-service workflows. Checklists are guidance only; current requirements must be confirmed with the issuing authority.
+- No API key, account, backend, or paid service is required. Document bytes and extracted fields are not uploaded or persisted by FORMGENIUS; processing is local to the browser. Public CDN/model downloads require internet access.
+
 ## GitHub Pages deployment
 
 The repository includes .github/workflows/deploy-pages.yml. On each push to main, it validates the static app, uploads the repository root as a Pages artifact and deploys it using the official Pages actions. Every run has a unique concurrency group and cancel-in-progress is false, so newer commits do not cancel earlier deployments.
@@ -55,7 +63,7 @@ Run python -m http.server 8000 and open http://localhost:8000. Do not open the H
 
 ## Test
 
-Run npm test. The test checks JavaScript syntax and verifies Stage 1, Stage 2, live-camera controls, map/report integrations, and accessibility-motion styles.
+Run npm test. The test checks JavaScript syntax and verifies ECHO, CIVICLENS, FORMGENIUS, live-camera controls, map/report integrations, and accessibility-motion styles.
 
 ## Roadmap
 

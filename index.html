@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f">
 <meta name="description" content="SYNVORA ECHO accessible visual perception workspace"><title>SYNVORA — ECHO</title>
 <link rel="stylesheet" href="./styles.css?v=stage2-vision-lite-20261106-r9">
-<script defer src="./model-manager.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./camera-manager.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./app.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./civiclens.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./live-route.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./civic-ai.js?v=stage2-vision-lite-20261106-r9"></script></head><body>
+<script defer src="./model-manager.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./camera-manager.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./app.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./civiclens.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./live-route.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./civic-ai.js?v=stage2-vision-lite-20261106-r9"></script><script defer src="./formgenius.js?v=formgenius-20261106-r1"></script></head><body>
 <a class="skip-link" href="#workspace" data-i18n="skip">Skip to workspace</a>
 <header class="topbar" role="banner"><a class="brand" href="./"><span class="brand-mark">S</span><span>SYNVORA<small>ACCESSIBILITY INTELLIGENCE</small></span></a>
 <div class="top-actions"><span class="status" id="model-status" role="status" aria-live="polite">ECHO READY · MODELS LOAD ON DEMAND</span><button id="settings-toggle" class="icon-button" aria-expanded="false" aria-controls="settings-panel" aria-label="Open quick settings">☷</button></div></header>
@@ -86,7 +86,28 @@
   <div class="controls"><button class="primary" id="civic-save-report">Save report on this device</button><button id="civic-use-current">Use current location for report</button></div>
   <p class="small muted">A saved note is an unverified observation, not an official accessibility rating. Do not include names, contact details or sensitive personal information.</p>
  </section>
-</section></main>
+</section><section class="card formgenius-card formgenius-reveal" id="formgenius" aria-labelledby="formgenius-title">
+ <div class="card-head"><div><div class="eyebrow">FORMGENIUS · DOCUMENT INTELLIGENCE</div><h2 id="formgenius-title">Understand forms. Navigate services.</h2></div><span class="pill" id="fg-state">READY · LOCAL PROCESSING</span></div>
+ <p class="muted">Read digital PDFs and scanned forms, extract likely fields, explain common form sections, and build a review checklist. Files are processed in this browser and are not uploaded or saved by SYNVORA.</p>
+ <div class="fg-upload-grid">
+  <label class="fg-drop" id="fg-drop" for="fg-file"><span class="fg-file-icon">▤</span><strong>Drop a form here or choose a file</strong><span>PDF, PNG, JPG or WEBP · local processing</span><input id="fg-file" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" hidden></label>
+  <div class="fg-upload-actions"><label for="fg-language">OCR language</label><select id="fg-language"><option value="eng+hin">English + हिन्दी</option><option value="eng">English</option><option value="hin">हिन्दी</option></select><button class="primary" id="fg-analyze" disabled>Read document</button><button id="fg-clear" type="button">Clear document</button><p class="small muted">For privacy, avoid uploading documents containing information you do not want processed on this device. Do not upload passwords or payment details.</p></div>
+ </div>
+ <p id="fg-status" class="fg-status" role="status" aria-live="polite">Choose a document to begin.</p>
+ <div class="fg-workspace">
+  <section class="fg-pane"><div class="inline-head"><h3>Document text</h3><span class="pill" id="fg-pages">NO DOCUMENT</span></div><textarea id="fg-text" rows="11" placeholder="Extracted document text will appear here…" spellcheck="false"></textarea><p class="small muted">You can correct OCR text before extracting fields. Scanned forms may need manual review.</p></section>
+  <section class="fg-pane"><div class="inline-head"><h3>Detected form fields</h3><span class="pill" id="fg-completion">0% REVIEWED</span></div><div class="fg-progress"><span id="fg-progress-fill"></span></div><div id="fg-fields" class="fg-fields"><p class="muted small">Read a document to identify likely fields.</p></div><div class="controls"><button id="fg-export-json" disabled>Export field data</button><button id="fg-copy" disabled>Copy field data</button><button id="fg-print" disabled>Print review sheet</button></div></section>
+ </div>
+ <section class="fg-guide">
+  <div class="card-head"><div><div class="eyebrow">SERVICE NAVIGATOR</div><h3>Guided application checklist</h3></div><span class="pill">GENERAL GUIDANCE</span></div>
+  <p class="muted small">Choose a broad service category to see a practical preparation checklist. Requirements vary by authority and can change; verify the latest official instructions before submitting anything.</p>
+  <label class="fg-service-label" for="fg-service">What kind of service is this?</label>
+  <select id="fg-service"><option value="general">General application</option><option value="education">School / education</option><option value="identity">Identity / address update</option><option value="health">Healthcare / appointment</option><option value="accessibility">Accessibility / disability service</option><option value="public">Public service / local authority</option></select>
+  <div id="fg-guide-list" class="fg-guide-list" aria-live="polite"></div>
+ </section>
+ <p class="model-note">SYNVORA helps organise information; it does not submit applications, certify eligibility, provide legal advice, or guarantee that a form is complete. Review every extracted value against the original document.</p>
+</section>
+</main>
 <aside id="settings-panel" class="settings-panel" hidden aria-labelledby="settings-title"><div class="card-head"><h2 id="settings-title" data-i18n="quickSettings">Quick settings</h2><button id="settings-close" aria-label="Close settings">✕</button></div>
 <label class="check-label"><input type="checkbox" id="reduce-motion"><span data-i18n="reduceMotion">Reduce motion</span></label><label class="check-label"><input type="checkbox" id="keyboard-mode"><span data-i18n="keyboardFocus">Strong keyboard focus</span></label><p class="muted small" data-i18n="keyboardHelp">Use Tab, Shift+Tab, Enter and Space to navigate. Press Escape to close this panel.</p></aside>
 <footer><span>SYNVORA · ECHO · STAGE 01</span><span data-i18n="safetyFooter">Assistive information only. Never rely on this app to confirm that a route is safe.</span></footer></body></html>
