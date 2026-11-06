@@ -2,8 +2,8 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f">
 <meta name="description" content="SYNVORA ECHO accessible visual perception workspace"><title>SYNVORA — ECHO</title>
-<link rel="stylesheet" href="./styles.css?v=stage2-ui-20261106-r1">
-<script defer src="./app.js?v=stage2-ui-20261106-r1"></script><script defer src="./civiclens.js?v=stage2-ui-20261106-r1"></script><script defer src="./live-route.js?v=stage2-ui-20261106-r1"></script><script defer src="./civic-ai.js?v=stage2-ui-20261106-r1"></script><script defer src="./civic-cloud.js?v=stage2-ui-20261106-r1"></script></head><body>
+<link rel="stylesheet" href="./styles.css?v=stage2-camera-fix-20261106-r2">
+<script defer src="./camera-manager.js?v=stage2-camera-fix-20261106-r2"></script><script defer src="./app.js?v=stage2-camera-fix-20261106-r2"></script><script defer src="./civiclens.js?v=stage2-camera-fix-20261106-r2"></script><script defer src="./live-route.js?v=stage2-camera-fix-20261106-r2"></script><script defer src="./civic-ai.js?v=stage2-camera-fix-20261106-r2"></script></head><body>
 <a class="skip-link" href="#workspace" data-i18n="skip">Skip to workspace</a>
 <header class="topbar" role="banner"><a class="brand" href="./"><span class="brand-mark">S</span><span>SYNVORA<small>ACCESSIBILITY INTELLIGENCE</small></span></a>
 <div class="top-actions"><span class="status" id="model-status" role="status" aria-live="polite">ECHO READY · MODELS LOAD ON DEMAND</span><button id="settings-toggle" class="icon-button" aria-expanded="false" aria-controls="settings-panel" aria-label="Open quick settings">☷</button></div></header>
@@ -46,23 +46,12 @@
   <button id="civic-ai-report" disabled>Use selected finding in report form</button>
  </section>
  <section class="civic-dashboard card" id="civic-dashboard">
-  <div class="card-head"><div><div class="eyebrow">CIVIC INTELLIGENCE</div><h3>Accessibility dashboard</h3></div><span class="pill">LOCAL + SYNCED REPORTS</span></div>
+  <div class="card-head"><div><div class="eyebrow">CIVIC INTELLIGENCE</div><h3>Accessibility dashboard</h3></div><span class="pill">LOCAL DEVICE REPORTS</span></div>
   <div class="civic-metrics">
    <div><strong id="civic-metric-total">0</strong><span>Total reports</span></div><div><strong id="civic-metric-open">0</strong><span>Unresolved</span></div><div><strong id="civic-metric-sites">0</strong><span>Buildings / places</span></div><div><strong id="civic-metric-debt">0</strong><span>Accessibility debt index</span></div>
   </div>
   <div class="civic-dashboard-grid"><div><h4>Hotspots & missing infrastructure</h4><div id="civic-hotspot-list" class="muted small">No report clusters yet.</div></div><div><h4>Inspection priority analytics</h4><p class="muted small">Rule-based triage from severity, frequency and report age; this is not a trained predictive model.</p><div id="civic-priority-list" class="muted small">No priorities yet.</div></div></div>
-  <div class="civic-form-actions"><button id="civic-cloud-sync">Sync community reports</button><span id="civic-cloud-status" class="muted small" role="status" aria-live="polite">Cloud sharing is optional and requires your own Supabase project.</span></div>
- </section>
- <details class="civic-backend card"><summary>Configure community backend (Supabase)</summary>
-  <p class="muted small">Create a Supabase project and run <code>backend/supabase-schema.sql</code> in its SQL editor. Enter the project URL and public anon key, then create/sign in to an account. Never use a service-role key in this browser app.</p>
-  <div class="civic-backend-grid">
-   <label>Project URL<input id="civic-supabase-url" type="url" placeholder="https://your-project.supabase.co"></label>
-   <label>Public anon key<input id="civic-supabase-key" type="password" autocomplete="off"></label>
-   <label>Email<input id="civic-supabase-email" type="email" autocomplete="email"></label>
-   <label>Password<input id="civic-supabase-password" type="password" autocomplete="current-password"></label>
-  </div>
-  <div class="controls"><button id="civic-backend-test">Test connection</button><button id="civic-backend-signup">Create account</button><button id="civic-backend-signin">Sign in</button><button id="civic-backend-signout">Sign out</button></div>
- </details>
+  <p class="muted small">All reports and dashboard analytics stay on this device. Use Export my reports to create a backup file; no account, cloud database or API key is required.</p>
 
  <div class="civic-toolbar">
   <button class="primary" id="civic-location">Use my location</button>
