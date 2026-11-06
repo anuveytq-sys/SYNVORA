@@ -60,7 +60,7 @@ Run npm test. The test checks JavaScript syntax and verifies Stage 1, Stage 2, l
 ## Roadmap
 
 1. **ECHO — Perception:** camera/image understanding, OCR, voice interaction and accessibility settings.
-2. **CIVICLENS — Civic accessibility:** map and report public accessibility barriers and accessible infrastructure. (Implemented; optional cloud sync requires Supabase setup)
+2. **CIVICLENS — Civic accessibility:** map and report public accessibility barriers and accessible infrastructure. (Implemented; private reports are local-only and exportable)
 3. **FORMGENIUS — Documents and services:** explain forms, extract fields and guide users through service workflows.
 4. **TERRAIN AI — Environment awareness:** terrain context, hazard awareness and accessible route intelligence.
 5. **CORE — Unified ecosystem:** connect the modules through a coordinated, privacy-conscious platform.
@@ -71,6 +71,6 @@ MIT. See LICENSE.
 
 ### CIVICLENS Stage 2 completion notes
 
-CIVICLENS includes a live OWL-ViT visual candidate scanner, category-based barrier reporting, optional GPS and camera-frame evidence, local verification status, duplicate suppression (same category within 30 metres and 24 hours), OpenStreetMap discovery, report dashboard, hotspot/missing-infrastructure summaries, an accessibility-debt indicator, and rule-based inspection-priority estimates. Optional Supabase community sync is implemented but requires the repository owner to provision a project, run `backend/supabase-schema.sql`, and configure the project URL/public anon key plus a signed-in account. No service-role key is used or required in the browser. Until configured, reports remain local to the device and can be exported.
+CIVICLENS includes a live OWL-ViT visual candidate scanner, category-based barrier reporting, optional GPS and camera-frame evidence, local verification status, duplicate suppression (same category within 30 metres and 24 hours), OpenStreetMap discovery, report dashboard, hotspot/missing-infrastructure summaries, an accessibility-debt indicator, and rule-based inspection-priority estimates. Community report synchronization is intentionally not included. Reports remain private on the current device and can be exported as JSON; no account, cloud database, API key or paid service is required.
 
 The debt index and inspection-priority ranking are transparent heuristics, not validated public accessibility ratings or trained predictions. AI camera detections are candidates only and must be reviewed. No camera scan can establish path safety.
