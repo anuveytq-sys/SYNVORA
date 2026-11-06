@@ -2,8 +2,8 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f">
 <meta name="description" content="SYNVORA ECHO accessible visual perception workspace"><title>SYNVORA — ECHO</title>
-<link rel="stylesheet" href="./styles.css?v=stable-fix-20261106-r1">
-<script defer src="./model-manager.js?v=stable-fix-20261106-r1"></script><script defer src="./camera-manager.js?v=stable-fix-20261106-r1"></script><script defer src="./app.js?v=stable-fix-20261106-r1"></script><script defer src="./civiclens.js?v=stable-fix-20261106-r1"></script><script defer src="./formgenius.js?v=stable-fix-20261106-r1"></script></head><body>
+<link rel="stylesheet" href="./styles.css?v=terrain-stage4-r1">
+<script defer src="./model-manager.js?v=stable-fix-20261106-r1"></script><script defer src="./camera-manager.js?v=stable-fix-20261106-r1"></script><script defer src="./app.js?v=stable-fix-20261106-r1"></script><script defer src="./civiclens.js?v=stable-fix-20261106-r1"></script><script defer src="./formgenius.js?v=terrain-stage4-r1"></script><script defer src="./terrain-ai.js?v=terrain-stage4-r1"></script><script defer src="./live-route.js?v=terrain-stage4-r1"></script></head><body>
 <a class="skip-link" href="#workspace" data-i18n="skip">Skip to workspace</a>
 <header class="topbar" role="banner"><a class="brand" href="./"><span class="brand-mark">S</span><span>SYNVORA<small>ACCESSIBILITY INTELLIGENCE</small></span></a>
 <div class="top-actions"><span class="status" id="model-status" role="status" aria-live="polite">ECHO READY · MODELS LOAD ON DEMAND</span><button id="settings-toggle" class="icon-button" aria-expanded="false" aria-controls="settings-panel" aria-label="Open quick settings">☷</button></div></header>
@@ -66,7 +66,31 @@
   <div class="controls"><button class="primary" id="civic-save-report">Save report on this device</button><button id="civic-use-current">Use current location for report</button></div>
   <p class="small muted">A saved note is an unverified observation, not an official accessibility rating. Do not include names, contact details or sensitive personal information.</p>
  </section>
-</section><section class="card formgenius-card formgenius-reveal" id="formgenius" aria-labelledby="formgenius-title">
+</section>
+<section class="card terrain-card terrain-reveal" id="terrain-ai" aria-labelledby="terrain-title">
+ <div class="card-head"><div><div class="eyebrow">TERRAIN AI · IMAGE ANALYSIS</div><h2 id="terrain-title">Surface & environment lab</h2></div><span class="pill" id="terrain-state">AWAITING IMAGE</span></div>
+ <p class="muted">Analyze an uploaded image or a frame captured in ECHO. The overlay highlights visual texture and contrast variation for research and accessibility observations. It does not assess ground strength, traction, depth, stability or safe routes.</p>
+ <div class="terrain-inputs">
+  <label class="terrain-upload" for="terrain-file"><span>＋</span><strong>Upload terrain image</strong><small>JPG, PNG, WEBP · up to 12 MB</small></label><input id="terrain-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+  <button id="terrain-use-echo" type="button" disabled>Use latest ECHO capture</button><button id="terrain-analyze" class="primary" type="button" disabled>Analyze surface image</button><button id="terrain-clear" type="button">Clear</button>
+ </div>
+ <p id="terrain-status" class="terrain-status" role="status" aria-live="polite">Upload an image or capture a frame in the ECHO camera first.</p>
+ <div class="terrain-viewer" id="terrain-viewer"><div class="terrain-empty" id="terrain-empty">IMAGE ANALYSIS VIEWPORT <small>Surface visualization appears here after analysis.</small></div><img id="terrain-image" alt="Selected terrain for visual analysis" hidden><canvas id="terrain-overlay" aria-label="Visual variation overlay" hidden></canvas></div>
+ <div class="terrain-legend"><span><i class="terrain-swatch terrain-low"></i>Lower visual variation</span><span><i class="terrain-swatch terrain-mid"></i>Moderate visual variation</span><span><i class="terrain-swatch terrain-high"></i>Higher visual variation</span><span><i class="terrain-swatch terrain-uncertain"></i>Insufficient visual signal</span></div>
+ <div class="terrain-metrics"><div><strong id="terrain-regions">—</strong><span>Regions sampled</span></div><div><strong id="terrain-variation">—</strong><span>Variation profile</span></div><div><strong id="terrain-uncertainty">—</strong><span>Uncertain regions</span></div></div>
+ <div class="terrain-results"><section><h3>Visual surface observations</h3><ul id="terrain-findings"><li class="muted">No analysis yet.</li></ul></section><section><h3>Analysis controls</h3><label class="terrain-toggle"><input id="terrain-overlay-toggle" type="checkbox" checked> Show translucent region overlay</label><label class="terrain-toggle"><input id="terrain-edges-toggle" type="checkbox" checked> Include local contrast variation</label><div class="controls"><button id="terrain-export" disabled>Export analysis JSON</button><button id="terrain-speak" disabled>Read summary aloud</button></div></section></div>
+ <p class="model-note">Experimental image-derived visualisation only. Green/amber/red indicate relative image variation—not safety, walkability, material identity or foot placement. A single image cannot establish slope, depth, load-bearing capacity, grip, hidden hazards or route suitability. Do not use this feature to navigate or choose where to step. Processing stays in this browser.</p>
+</section>
+<section class="card live-object-card terrain-reveal" id="live-route" aria-labelledby="route-title">
+ <div class="card-head"><div><div class="eyebrow">ECHO EXTENSION · LIVE OBJECT CAMERA</div><h2 id="route-title">Live object detection</h2></div><span class="pill" id="route-state">CAMERA OFF</span></div>
+ <p class="muted">A separate live camera that labels supported everyday objects. It is not the terrain image analyzer and does not provide navigation or safety judgments.</p>
+ <div class="route-viewer" id="route-viewer"><video id="route-video" autoplay muted playsinline hidden></video><canvas id="route-overlay" hidden></canvas><div class="route-empty" id="route-empty">LIVE OBJECT CAMERA · OFF</div></div>
+ <div class="controls"><button class="primary" id="route-start">Start live object camera</button><button id="route-stop" disabled>Stop camera</button><label class="check-label"><input id="route-voice" type="checkbox"><span>Optional spoken object labels</span></label></div>
+ <div class="route-metrics"><div><strong id="route-model-state">NOT LOADED</strong><span>Detector</span></div><div><strong id="route-fps">—</strong><span>Analysis time</span></div><div><strong id="route-zones">—</strong><span>Objects detected</span></div></div>
+ <div class="result-block"><h3>Live observations</h3><ul id="route-observations"><li class="muted">Start the camera to begin.</li></ul></div>
+ <p id="route-status" class="muted small" role="status" aria-live="polite">Camera is off. Frames are analyzed locally and are not saved.</p>
+</section>
+<section class="card formgenius-card formgenius-reveal" id="formgenius" aria-labelledby="formgenius-title">
  <div class="card-head"><div><div class="eyebrow">FORMGENIUS · DOCUMENT INTELLIGENCE</div><h2 id="formgenius-title">Understand forms. Navigate services.</h2></div><span class="pill" id="fg-state">READY · LOCAL PROCESSING</span></div>
  <p class="muted">Read digital PDFs and scanned forms, extract likely fields, explain common form sections, and build a review checklist. Files are processed in this browser and are not uploaded or saved by SYNVORA.</p>
  <div class="fg-upload-grid">

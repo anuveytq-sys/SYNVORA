@@ -1,6 +1,6 @@
 # SYNVORA — Universal Accessibility Intelligence Platform
 
-SYNVORA brings together ECHO, CIVICLENS and FORMGENIUS under a shared accessibility workspace. The experimental terrain-camera panel and inaccurate generic-object civic camera scanner have been removed; the core image workspace, civic map/reporting and document tools remain.
+SYNVORA brings together ECHO, CIVICLENS and FORMGENIUS under a shared accessibility workspace. The platform includes ECHO, CIVICLENS, FORMGENIUS, an image-only TERRAIN AI visual-analysis lab, and a separate optional live object-detection camera.
 
 ## Stage 1 — ECHO
 
@@ -51,6 +51,22 @@ The shipped COCO-SSD model is a general object detector. It may miss or mislabel
 - Includes generic preparation checklists for education, identity/address, healthcare, accessibility and public-service workflows. Checklists are guidance only; current requirements must be confirmed with the issuing authority.
 - No API key, account, backend, or paid service is required. Document bytes and extracted fields are not uploaded or persisted by FORMGENIUS; processing is local to the browser. Public CDN/model downloads require internet access.
 
+
+
+## Stage 4 — TERRAIN AI (image-only visual analysis)
+
+- Accepts a user-selected JPG, PNG or WEBP image, or the latest image/frame captured in ECHO; no always-on terrain camera is included.
+- Builds a translucent 12×8 region overlay using browser-side luminance texture and local contrast sampling.
+- Classifies sampled regions as lower, moderate or higher visual variation, with separate uncertainty regions for weak, extreme-brightness or insufficient visual signal.
+- Displays a visual variation summary, sampled-region counts, uncertainty counts, optional local-contrast analysis, overlay toggle, spoken summary and JSON export.
+- All analysis is performed in the browser; no API key, account, backend or upload service is required.
+- This is deterministic image processing, not a trained terrain/material/depth model. Colours are visual-variation cues only—not safety, walkability, slope, traction, stability, load-bearing, route or foot-placement predictions. A single image cannot establish those properties.
+
+## Separate live object camera
+
+- Restores the third, independent live camera using the lightweight COCO-SSD MobileNet detector, with transient boxes, object labels, confidence percentages, optional spoken observations, explicit start/stop and camera cleanup.
+- It is separate from TERRAIN AI; the removed live footstep/terrain-awareness camera is not restored.
+
 ## GitHub Pages deployment
 
 The repository includes .github/workflows/deploy-pages.yml. On each push to main, it validates the static app, uploads the repository root as a Pages artifact and deploys it using the official Pages actions. Every run has a unique concurrency group and cancel-in-progress is false, so newer commits do not cancel earlier deployments.
@@ -63,7 +79,7 @@ Run python -m http.server 8000 and open http://localhost:8000. Do not open the H
 
 ## Test
 
-Run npm test. The test checks JavaScript syntax and verifies ECHO, CIVICLENS, FORMGENIUS, map/report integrations, explicit file-picker wiring and accessibility-motion styles.
+Run npm test. The test checks JavaScript syntax and verifies ECHO, CIVICLENS, FORMGENIUS, TERRAIN AI, live object camera, map/report integrations, explicit file-picker wiring and accessibility-motion styles.
 
 ## Roadmap
 
