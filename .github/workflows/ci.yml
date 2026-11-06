@@ -1,0 +1,41 @@
+name: SYNVORA Stage 1 CI
+on:
+  push:
+    branches: ["main", "stage-1/**"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+permissions:
+  contents: read
+# Unique run groups ensure a newer commit never cancels an in-progress or queued run.
+concurrency:
+  group: synvora-ci-${{ github.run_id }}-${{ github.run_attempt }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    name: Validate ECHO application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check JavaScript syntax
+        run: npm test
+      - name: Verify required application files
+        run: |
+          test -s index.html
+          test -s styles.css
+          test -s app.js
+          test -s README.md
+      - name: Upload validated source bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: synvora-echo-stage-1-${{ github.sha }}
+          path: |
+            index.html
+            styles.css
+            app.js
+            README.md
+          if-no-files-found: error
+          retention-days: 14
