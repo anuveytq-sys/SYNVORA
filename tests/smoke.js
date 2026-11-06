@@ -25,3 +25,6 @@ assert.ok(css.includes(".civic-ai-view")&&css.includes(".civic-dashboard-grid")&
 assert.ok(civic.includes("renderDashboard")&&civic.includes("state.reportPoint")&&civic.includes("renderReports()},200"),"CIVICLENS dashboard, location and initial report rendering must initialize");
 assert.ok(civicAI.includes("synvora:camera-starting")&&route.includes("synvora:camera-starting"),"Camera modes must stop one another before acquiring camera access");
 assert.ok(civicCloud.includes("on_conflict=id"),"Cloud sync must use idempotent report upserts");
+
+assert.ok(civic.includes("overpass.kumi.systems")&&civic.includes("overpass.private.coffee"),"CIVICLENS must retry backup Overpass services");
+assert.ok(civic.includes("synvora-civiclens-osm-cache-v1")&&civic.includes("saved OpenStreetMap snapshot"),"CIVICLENS must offer a clearly labelled cached map fallback");

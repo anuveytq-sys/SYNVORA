@@ -35,7 +35,7 @@ The shipped COCO-SSD model is a general object detector. The optional OWL-ViT sc
 - Search-radius controls, refresh, map popups, source attribution and uncertainty labels.
 - Private barrier observations with category, impact, notes and map-selected/current location; local persistence, deletion and JSON export.
 - Reports are explicitly unverified, stored on the current device and never automatically published. OpenStreetMap records are community contributions, not verified access guarantees.
-- Uses public OpenStreetMap/Nominatim/Overpass services; availability, rate limits and coverage depend on those services and network access.
+- Uses public OpenStreetMap/Nominatim/Overpass services, retries backup Overpass instances when the primary is unavailable, and can show a clearly labelled cached snapshot for the same nearby search. Availability, rate limits and coverage still depend on those services and network access.
 
 ## Live camera awareness (ECHO extension)
 
