@@ -21,4 +21,7 @@ for(const id of ["civic-ai-video","civic-ai-start","civic-ai-stop","civic-ai-rep
 for(const marker of ["zero-shot-object-detection","Xenova/owlvit-base-patch32","getUserMedia","setInterval","pagehide"])assert.ok(civicAI.includes(marker),"Missing live civic AI scanner feature: "+marker);
 for(const marker of ["/auth/v1/signup","/auth/v1/token?grant_type=password","/rest/v1/civic_reports","created_by","civiclens:cloud-updated"])assert.ok(civicCloud.includes(marker),"Missing community backend feature: "+marker);
 for(const marker of ["renderDashboard","verified","duplicate","30 m","24 hours"])assert.ok(civic.includes(marker),"Missing civic reporting/analytics feature: "+marker);
-assert.ok(css.includes(".civic-ai-view")&&css.includes(".civic-dashboard-grid"),"CIVICLENS animated panel styling missing");
+assert.ok(css.includes(".civic-ai-view")&&css.includes(".civic-dashboard-grid")&&css.includes(".civic-reveal.is-visible"),"CIVICLENS animated panel styling missing");
+assert.ok(civic.includes("renderDashboard")&&civic.includes("state.reportPoint")&&civic.includes("renderReports()},200"),"CIVICLENS dashboard, location and initial report rendering must initialize");
+assert.ok(civicAI.includes("synvora:camera-starting")&&route.includes("synvora:camera-starting"),"Camera modes must stop one another before acquiring camera access");
+assert.ok(civicCloud.includes("on_conflict=id"),"Cloud sync must use idempotent report upserts");
