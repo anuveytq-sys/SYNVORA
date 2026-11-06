@@ -127,13 +127,5 @@ body.high-contrast .fg-pane,body.high-contrast .fg-field,body.high-contrast .fg-
 .fg-explanation strong{font-size:.78rem;color:#a8f4f5}.fg-explanation p{font-size:.72rem;line-height:1.45;color:var(--muted);margin:6px 0 0}
 @media(max-width:760px){.fg-explanations{grid-template-columns:1fr 1fr}}@media(max-width:480px){.fg-explanations{grid-template-columns:1fr}}
 
-/* Fixed camera HUD ornaments: deliberately not projected onto terrain or linked to detections. */
-.route-visual-hud{display:none;position:absolute;z-index:3;top:10px;right:10px;max-width:calc(100% - 20px);padding:8px 10px;border:1px solid rgba(135,190,220,.5);border-radius:12px;background:rgba(3,12,24,.78);backdrop-filter:blur(12px);pointer-events:none;box-shadow:0 8px 28px rgba(0,0,0,.32)}
-.route-viewer.is-live .route-visual-hud{display:grid;gap:5px;animation:route-hud-in .35s ease-out both}
-.route-hud-label,.route-hud-note{font-size:9px;letter-spacing:.11em;color:#d5e7f6;text-align:center;white-space:nowrap}
-.route-hud-note{font-size:8px;letter-spacing:.04em;color:#b6c8d8}
-.route-hud-feet{display:flex;align-items:center;justify-content:center;gap:13px;padding:2px 8px}
-.hud-foot{width:19px;height:31px;fill:currentColor;filter:drop-shadow(0 0 5px currentColor);opacity:.9}
-.hud-blue{color:#53baff}.hud-green{color:#45e6a8}.hud-red{color:#ff657b}
-@keyframes route-hud-in{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){.route-viewer.is-live .route-visual-hud{animation:none}}
+
+.fg-scroll-reveal{opacity:0;transform:translateY(24px) scale(.992);filter:blur(2px);transition:opacity .65s ease,transform .7s cubic-bezier(.16,1,.3,1),filter .65s ease;transition-delay:var(--fg-delay,0ms)}.fg-scroll-reveal.is-visible{opacity:1;transform:none;filter:none}@media(prefers-reduced-motion:reduce){.fg-scroll-reveal,.fg-scroll-reveal.is-visible{opacity:1;transform:none;filter:none;transition:none}}body.reduce-motion .fg-scroll-reveal,body.reduce-motion .fg-scroll-reveal.is-visible{opacity:1;transform:none;filter:none;transition:none}

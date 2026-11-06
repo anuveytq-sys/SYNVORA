@@ -1,13 +1,13 @@
 # SYNVORA — Universal Accessibility Intelligence Platform
 
-SYNVORA brings together ECHO, CIVICLENS, FORMGENIUS and TERRAIN AI under a shared CORE. This repository ships ECHO perception, CIVICLENS civic accessibility intelligence, FORMGENIUS document intelligence, and a separate live-camera visual-awareness extension.
+SYNVORA brings together ECHO, CIVICLENS and FORMGENIUS under a shared accessibility workspace. The experimental terrain-camera panel and inaccurate generic-object civic camera scanner have been removed; the core image workspace, civic map/reporting and document tools remain.
 
 ## Stage 1 — ECHO
 
 - Camera capture and image upload, with permission handling and camera cleanup.
 - In-browser COCO-SSD object detection with confidence percentages.
 - Scene summaries based on detected labels, with uncertainty statements.
-- Optional, on-demand OWL-ViT zero-shot visual scan for candidate stairs, ramps, doors, curbs, sidewalks, tactile paving, handrails, obstacles and other scene objects. The model loads only when requested and runs in the browser.
+- Lightweight on-demand common-object detection; it is not an accessibility-feature classifier.
 - OCR in English and Hindi using Tesseract.js language data.
 - English/Hindi speech synthesis and speech recognition where supported by the browser.
 - Image questions grounded in detected labels and OCR, with clear unsupported-question responses.
@@ -18,7 +18,7 @@ SYNVORA brings together ECHO, CIVICLENS, FORMGENIUS and TERRAIN AI under a share
 
 ## Important model limitations
 
-The shipped COCO-SSD model is a general object detector. The optional OWL-ViT scan uses open-vocabulary candidate labels to suggest possible stairs, ramps, doors, obstacles and other items, but it is **not validated** on an accessibility benchmark and may miss or mislabel them. Candidate scores are not calibrated safety probabilities. It cannot determine whether a path is safe, whether a ramp is usable, or whether an obstacle blocks a route. A negative result never proves that a hazard is absent. Do not use ECHO as a mobility or emergency navigation system. Image questions are grounded only in object labels and OCR; this is not a general visual-language model. Do not use ECHO as a mobility or emergency navigation system. A specialist accessibility perception model with validated weights and evaluation data is still required before hazard-recognition claims can be marked complete.
+The shipped COCO-SSD model is a general object detector. It may miss or mislabel objects, including confusing floor textures or furniture. Confidence scores are not calibrated safety probabilities. It cannot determine whether a path is safe, whether a ramp is usable, or whether an obstacle blocks a route. A negative result never proves that a hazard is absent. Do not use ECHO as a mobility or emergency navigation system. Image questions are grounded only in object labels and OCR; this is not a general visual-language model.
 
 ## Browser and network requirements
 
@@ -63,7 +63,7 @@ Run python -m http.server 8000 and open http://localhost:8000. Do not open the H
 
 ## Test
 
-Run npm test. The test checks JavaScript syntax and verifies ECHO, CIVICLENS, FORMGENIUS, live-camera controls, map/report integrations, and accessibility-motion styles.
+Run npm test. The test checks JavaScript syntax and verifies ECHO, CIVICLENS, FORMGENIUS, map/report integrations, explicit file-picker wiring and accessibility-motion styles.
 
 ## Roadmap
 
@@ -79,6 +79,6 @@ MIT. See LICENSE.
 
 ### CIVICLENS Stage 2 completion notes
 
-CIVICLENS includes a live OWL-ViT visual candidate scanner, category-based barrier reporting, optional GPS and camera-frame evidence, local verification status, duplicate suppression (same category within 30 metres and 24 hours), OpenStreetMap discovery, report dashboard, hotspot/missing-infrastructure summaries, an accessibility-debt indicator, and rule-based inspection-priority estimates. Community report synchronization is intentionally not included. Reports remain private on the current device and can be exported as JSON; no account, cloud database, API key or paid service is required.
+CIVICLENS includes category-based barrier reporting, optional GPS, local verification status, duplicate suppression (same category within 30 metres and 24 hours), OpenStreetMap discovery, report dashboard, hotspot/missing-infrastructure summaries, an accessibility-debt indicator, and rule-based inspection-priority estimates. Community report synchronization is intentionally not included. Reports remain private on the current device and can be exported as JSON; no account, cloud database, API key or paid service is required.
 
-The debt index and inspection-priority ranking are transparent heuristics, not validated public accessibility ratings or trained predictions. AI camera detections are candidates only and must be reviewed. No camera scan can establish path safety.
+The debt index and inspection-priority ranking are transparent heuristics, not validated public accessibility ratings or trained predictions. Automated camera-based barrier classification is not included because the available general-object model produced unreliable labels.

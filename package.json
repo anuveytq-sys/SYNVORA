@@ -1,1 +1,10 @@
-{"name":"synvora-accessibility-platform","version":"2.1.0","private":true,"description":"SYNVORA ECHO, CIVICLENS and live camera awareness","scripts":{"check":"node --check app.js && node --check civiclens.js && node --check civic-ai.js && node --check civic-cloud.js && node --check live-route.js && node --check tests/smoke.js","test":"npm run check && node tests/smoke.js"}}
+{
+  "name": "synvora-accessibility-platform",
+  "version": "2.1.0",
+  "private": true,
+  "description": "SYNVORA ECHO, CIVICLENS and FORMGENIUS accessibility workspace",
+  "scripts": {
+    "check": "node --check app.js && node --check civiclens.js && node --check formgenius.js && node --check model-manager.js && node --check camera-manager.js && node --check tests/smoke.js",
+    "test": "npm run check && node tests/smoke.js"
+  }
+}
