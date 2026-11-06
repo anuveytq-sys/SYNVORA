@@ -28,3 +28,5 @@ assert.ok(civicCloud.includes("on_conflict=id"),"Cloud sync must use idempotent 
 
 assert.ok(civic.includes("overpass.kumi.systems")&&civic.includes("overpass.private.coffee"),"CIVICLENS must retry backup Overpass services");
 assert.ok(civic.includes("synvora-civiclens-osm-cache-v1")&&civic.includes("saved OpenStreetMap snapshot"),"CIVICLENS must offer a clearly labelled cached map fallback");
+
+assert.ok(civicAI.includes("IntersectionObserver"),"CIVICLENS inner panels must animate on scroll");

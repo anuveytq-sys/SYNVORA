@@ -1,6 +1,6 @@
 # SYNVORA — Universal Accessibility Intelligence Platform
 
-SYNVORA brings together ECHO, CIVICLENS, FORMGENIUS and TERRAIN AI under a shared CORE. This repository currently ships the Stage 1 ECHO static web app.
+SYNVORA brings together ECHO, CIVICLENS, FORMGENIUS and TERRAIN AI under a shared CORE. This repository ships Stage 1 ECHO, Stage 2 CIVICLENS, and a separate live-camera visual-awareness extension.
 
 ## Stage 1 — ECHO
 
@@ -55,12 +55,12 @@ Run python -m http.server 8000 and open http://localhost:8000. Do not open the H
 
 ## Test
 
-Run npm test. The test checks JavaScript syntax and verifies that required Stage 1 controls and browser integrations are present.
+Run npm test. The test checks JavaScript syntax and verifies Stage 1, Stage 2, live-camera controls, map/report integrations, and accessibility-motion styles.
 
 ## Roadmap
 
 1. **ECHO — Perception:** camera/image understanding, OCR, voice interaction and accessibility settings.
-2. **CIVICLENS — Civic accessibility:** map and report public accessibility barriers and accessible infrastructure.
+2. **CIVICLENS — Civic accessibility:** map and report public accessibility barriers and accessible infrastructure. (Implemented; optional cloud sync requires Supabase setup)
 3. **FORMGENIUS — Documents and services:** explain forms, extract fields and guide users through service workflows.
 4. **TERRAIN AI — Environment awareness:** terrain context, hazard awareness and accessible route intelligence.
 5. **CORE — Unified ecosystem:** connect the modules through a coordinated, privacy-conscious platform.
