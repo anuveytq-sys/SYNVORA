@@ -7,6 +7,7 @@ SYNVORA brings together ECHO, CIVICLENS, FORMGENIUS and TERRAIN AI under a share
 - Camera capture and image upload, with permission handling and camera cleanup.
 - In-browser COCO-SSD object detection with confidence percentages.
 - Scene summaries based on detected labels, with uncertainty statements.
+- Optional, on-demand OWL-ViT zero-shot visual scan for candidate stairs, ramps, doors, curbs, sidewalks, tactile paving, handrails, obstacles and other scene objects. The model loads only when requested and runs in the browser.
 - OCR in English and Hindi using Tesseract.js language data.
 - English/Hindi speech synthesis and speech recognition where supported by the browser.
 - Image questions grounded in detected labels and OCR, with clear unsupported-question responses.
@@ -17,15 +18,15 @@ SYNVORA brings together ECHO, CIVICLENS, FORMGENIUS and TERRAIN AI under a share
 
 ## Important model limitations
 
-The shipped COCO-SSD model is a general object detector. It is **not** trained or validated to reliably detect stairs, ramps, doors, drop-offs, pavement hazards or route clearance. It cannot determine whether a path is safe. Image questions are grounded only in object labels and OCR; this is not a general visual-language model. Do not use ECHO as a mobility or emergency navigation system. A specialist accessibility perception model with validated weights and evaluation data is still required before hazard-recognition claims can be marked complete.
+The shipped COCO-SSD model is a general object detector. The optional OWL-ViT scan uses open-vocabulary candidate labels to suggest possible stairs, ramps, doors, obstacles and other items, but it is **not validated** on an accessibility benchmark and may miss or mislabel them. Candidate scores are not calibrated safety probabilities. It cannot determine whether a path is safe, whether a ramp is usable, or whether an obstacle blocks a route. A negative result never proves that a hazard is absent. Do not use ECHO as a mobility or emergency navigation system. Image questions are grounded only in object labels and OCR; this is not a general visual-language model. Do not use ECHO as a mobility or emergency navigation system. A specialist accessibility perception model with validated weights and evaluation data is still required before hazard-recognition claims can be marked complete.
 
 ## Browser and network requirements
 
 - Camera access requires HTTPS (GitHub Pages provides HTTPS) or localhost, plus user permission.
-- TensorFlow.js, COCO-SSD and Tesseract.js load from public CDNs.
+- TensorFlow.js, COCO-SSD, Tesseract.js and the optional Transformers.js runtime/model load from public CDNs/model hosting.
 - Hindi OCR downloads the English and Hindi trained-data files on first use and may take longer.
 - Speech recognition and Hindi voices vary by browser and device.
-- First model load requires internet. Offline model bundles are not included yet.
+- First model load requires internet. The optional OWL-ViT model is large and may be slow or unavailable on lower-memory phones. Offline model bundles are not included yet.
 
 ## GitHub Pages deployment
 
