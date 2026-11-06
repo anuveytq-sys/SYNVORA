@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f">
 <meta name="description" content="SYNVORA ECHO accessible visual perception workspace"><title>SYNVORA — ECHO</title>
 <link rel="stylesheet" href="./styles.css">
-<script defer src="./app.js"></script></head><body>
+<script defer src="./app.js"></script><script defer src="./civiclens.js"></script><script defer src="./live-route.js"></script></head><body>
 <a class="skip-link" href="#workspace" data-i18n="skip">Skip to workspace</a>
 <header class="topbar" role="banner"><a class="brand" href="./"><span class="brand-mark">S</span><span>SYNVORA<small>ACCESSIBILITY INTELLIGENCE</small></span></a>
 <div class="top-actions"><span class="status" id="model-status" role="status" aria-live="polite">ECHO READY · MODELS LOAD ON DEMAND</span><button id="settings-toggle" class="icon-button" aria-expanded="false" aria-controls="settings-panel" aria-label="Open quick settings">☷</button></div></header>
@@ -22,7 +22,48 @@
 <div class="profile-grid"><label><span data-i18n="profile">Profile</span><select id="profile"><option value="standard" data-i18n="profileStandard">Standard</option><option value="low-vision" data-i18n="profileLowVision">Low vision</option><option value="screen-reader" data-i18n="profileScreenReader">Screen reader</option><option value="motor" data-i18n="profileMotor">Motor accessibility</option><option value="hearing" data-i18n="profileHearing">Hearing accessibility</option></select></label>
 <label><span data-i18n="language">Language</span><select id="language"><option value="en-US">English</option><option value="hi-IN">हिन्दी</option></select></label>
 <label><span data-i18n="textSize">Text size</span><select id="text-size"><option value="1" data-i18n="textDefault">Default</option><option value="1.15" data-i18n="textLarge">Large</option><option value="1.3" data-i18n="textExtraLarge">Extra large</option><option value="1.5" data-i18n="textMaximum">Maximum</option></select></label>
-<label class="check-label"><input type="checkbox" id="contrast"><span data-i18n="highContrast">High contrast</span></label></div><p class="muted small" data-i18n="privacy">Preferences stay on this device. Images are processed in the browser, not sent to a SYNVORA server.</p></section></main>
+<label class="check-label"><input type="checkbox" id="contrast"><span data-i18n="highContrast">High contrast</span></label></div><p class="muted small" data-i18n="privacy">Preferences stay on this device. Images are processed in the browser, not sent to a SYNVORA server.</p></section>
+<section class="card route-card reveal-panel" id="live-route" aria-labelledby="route-title">
+ <div class="card-head"><div><div class="eyebrow">LIVE CAMERA · STAGE 01 EXTENSION</div><h2 id="route-title">Live route awareness</h2></div><span class="pill" id="route-state">CAMERA OFF</span></div>
+ <p class="muted">Continuous camera-based object awareness. Frames are analyzed in this browser and are not saved or uploaded. This is not a route planner and cannot identify the safest foothold or certify terrain.</p>
+ <div class="route-viewer" id="route-viewer"><video id="route-video" autoplay muted playsinline aria-label="Live camera preview"></video><canvas id="route-overlay" aria-hidden="true"></canvas><div id="route-empty" class="route-empty">Activate the camera to begin live awareness.</div></div>
+ <div class="controls"><button class="primary" id="route-start">Start live scan</button><button id="route-stop" disabled>Stop scan</button><label class="check-label route-voice"><input type="checkbox" id="route-voice">Voice alerts</label></div>
+ <p class="small muted" id="route-status" role="status" aria-live="polite">The scan runs only after you grant camera permission.</p>
+ <div class="result-block"><h3>Live visual observations</h3><ul id="route-observations" class="detection-list" aria-live="polite"><li class="muted">No live observations yet.</li></ul></div>
+ <p class="model-note"><strong>Safety limit:</strong> the general object model can miss hazards and does not assess ground stability, slopes, holes, drop-offs, water depth, grip, or route clearance. Never use it to choose a path or foothold. Stop and assess the environment directly; use a trusted mobility aid or qualified guide where appropriate.</p>
+</section>
+<section class="card civic-card reveal-panel" id="civiclens" aria-labelledby="civic-title">
+ <div class="card-head"><div><div class="eyebrow">STAGE 02 / CIVICLENS</div><h2 id="civic-title">Civic accessibility explorer</h2></div><span class="pill" id="civic-state">MAP READY</span></div>
+ <p class="muted">Explore OpenStreetMap accessibility tags, inspect mapped public infrastructure and keep private observations of barriers. Map records are community-contributed and may be incomplete or outdated.</p>
+ <div class="civic-toolbar">
+  <button class="primary" id="civic-location">Use my location</button>
+  <label class="civic-search-label" for="civic-search">Find a place</label><input id="civic-search" type="search" placeholder="Search a town, street or landmark">
+  <button id="civic-search-btn">Search</button>
+  <label class="civic-radius-label" for="civic-radius">Search radius</label><select id="civic-radius"><option value="300">300 m</option><option value="800" selected>800 m</option><option value="1500">1.5 km</option></select>
+  <button id="civic-refresh">Refresh map data</button>
+ </div>
+ <div class="civic-filters" aria-label="Map filters">
+  <label><input type="checkbox" data-civic-filter="access" checked> Wheelchair access</label><label><input type="checkbox" data-civic-filter="crossing" checked> Crossings</label><label><input type="checkbox" data-civic-filter="tactile" checked> Tactile paving</label><label><input type="checkbox" data-civic-filter="ramp" checked> Ramps</label><label><input type="checkbox" data-civic-filter="toilet" checked> Accessible toilets</label><label><input type="checkbox" data-civic-filter="lift" checked> Lifts</label><label><input type="checkbox" data-civic-filter="rest" checked> Rest points</label><label><input type="checkbox" data-civic-filter="parking" checked> Parking</label>
+ </div>
+ <div id="civic-map" class="civic-map" role="application" aria-label="Interactive accessibility map"></div>
+ <div class="civic-meta"><span id="civic-status" role="status" aria-live="polite">Choose Use my location or search for a place to load nearby mapped features.</span><span>Data: OpenStreetMap contributors · © OpenStreetMap</span></div>
+ <div class="civic-columns">
+  <section class="result-block"><div class="inline-head"><h3>Mapped infrastructure</h3><span id="civic-count" class="pill">0 FEATURES</span></div><ul id="civic-results" class="civic-results"><li class="muted">No area loaded yet.</li></ul></section>
+  <section class="result-block"><div class="inline-head"><h3>Community barrier notes</h3><button id="civic-export">Export my reports</button></div><ul id="civic-reports" class="civic-results"><li class="muted">No local reports saved.</li></ul></section>
+ </div>
+ <section class="civic-report">
+  <div class="eyebrow">PRIVATE LOCAL REPORT</div><h3>Record an accessibility barrier</h3>
+  <p class="muted small">Choose a point on the map or use your current location. Reports stay in this browser until you export them; they are not automatically published or sent to a server.</p>
+  <div class="civic-report-grid">
+   <label>Barrier type<select id="civic-report-type"><option value="blocked_path">Blocked path</option><option value="missing_ramp">Missing / unusable ramp</option><option value="broken_surface">Broken or uneven surface</option><option value="unsafe_crossing">Difficult crossing</option><option value="missing_tactile">Missing tactile guidance</option><option value="inaccessible_facility">Inaccessible facility</option><option value="other">Other barrier</option></select></label>
+   <label>Impact<select id="civic-report-impact"><option value="unknown">Not assessed</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
+   <label class="civic-notes">What did you observe?<textarea id="civic-report-notes" rows="3" maxlength="500" placeholder="Describe only what you observed. Avoid personal information."></textarea></label>
+  </div>
+  <p class="small muted" id="civic-report-location">No report location selected. Click the map or use my location.</p>
+  <div class="controls"><button class="primary" id="civic-save-report">Save report on this device</button><button id="civic-use-current">Use current location for report</button></div>
+  <p class="small muted">A saved note is an unverified observation, not an official accessibility rating. Do not include names, contact details or sensitive personal information.</p>
+ </section>
+</section></main>
 <aside id="settings-panel" class="settings-panel" hidden aria-labelledby="settings-title"><div class="card-head"><h2 id="settings-title" data-i18n="quickSettings">Quick settings</h2><button id="settings-close" aria-label="Close settings">✕</button></div>
 <label class="check-label"><input type="checkbox" id="reduce-motion"><span data-i18n="reduceMotion">Reduce motion</span></label><label class="check-label"><input type="checkbox" id="keyboard-mode"><span data-i18n="keyboardFocus">Strong keyboard focus</span></label><p class="muted small" data-i18n="keyboardHelp">Use Tab, Shift+Tab, Enter and Space to navigate. Press Escape to close this panel.</p></aside>
 <footer><span>SYNVORA · ECHO · STAGE 01</span><span data-i18n="safetyFooter">Assistive information only. Never rely on this app to confirm that a route is safe.</span></footer></body></html>

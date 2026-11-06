@@ -6,3 +6,10 @@ assert.ok(css.includes(".topbar{position:sticky;top:0;z-index:100"),"Header must
 assert.ok(css.includes(".reveal-panel.is-visible"),"Scroll reveal styles must exist");
 
 assert.ok(js.includes('if(!S.image){$("ocr-output").textContent=t("ocrUnavailable")'),"OCR must lazy-load Tesseract after image selection");
+
+for(const id of ["live-route","route-video","route-start","route-stop","route-observations","civiclens","civic-map","civic-location","civic-search","civic-results","civic-report-notes","civic-save-report","civic-export"])assert.match(html,new RegExp('id="'+id+'"'),"Missing Stage 2/live camera UI element: "+id);
+const civic=fs.readFileSync("civiclens.js","utf8");const route=fs.readFileSync("live-route.js","utf8");
+for(const marker of ["overpass-api.de","nominatim.openstreetmap.org","wheelchair","tactile_paving","civic-report","localStorage","exportReports","geolocation"])assert.ok(civic.includes(marker),"Missing CivicLens feature: "+marker);
+for(const marker of ["getUserMedia","cocoSsd.load","setInterval","speechSynthesis","pagehide","visibilitychange"])assert.ok(route.includes(marker),"Missing live camera feature: "+marker);
+assert.ok(css.includes(".civic-map")&&css.includes(".route-viewer"),"Stage 2 and live camera styles must exist");
+console.log("SYNVORA Stage 1 + Stage 2 + live camera smoke checks passed.");

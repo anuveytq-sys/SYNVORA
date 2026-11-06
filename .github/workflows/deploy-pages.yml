@@ -22,6 +22,8 @@ jobs:
           test -s index.html
           test -s styles.css
           test -s app.js
+          test -s civiclens.js
+          test -s live-route.js
           npm test
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

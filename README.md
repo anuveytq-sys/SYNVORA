@@ -28,6 +28,21 @@ The shipped COCO-SSD model is a general object detector. The optional OWL-ViT sc
 - Speech recognition and Hindi voices vary by browser and device.
 - First model load requires internet. The optional OWL-ViT model is large and may be slow or unavailable on lower-memory phones. Offline model bundles are not included yet.
 
+## Stage 2 — CIVICLENS
+
+- Interactive OpenStreetMap explorer with explicit, user-initiated geolocation or place search.
+- Nearby community-mapped accessibility records for wheelchair tags, crossings, tactile paving, ramps/lowered kerbs, toilets, lifts, rest points and parking, with category filters and map/list synchronization.
+- Search-radius controls, refresh, map popups, source attribution and uncertainty labels.
+- Private barrier observations with category, impact, notes and map-selected/current location; local persistence, deletion and JSON export.
+- Reports are explicitly unverified, stored on the current device and never automatically published. OpenStreetMap records are community contributions, not verified access guarantees.
+- Uses public OpenStreetMap/Nominatim/Overpass services; availability, rate limits and coverage depend on those services and network access.
+
+## Live camera awareness (ECHO extension)
+
+- Starts only after an explicit camera action and browser permission; continuously analyzes the live video stream with a general COCO-SSD model in the browser.
+- Draws transient object boxes and labels, optionally announces observations, and releases camera tracks on stop, page hide or tab backgrounding.
+- Frames are not captured as files, persisted or uploaded by this feature. The general detector does not identify ground stability, route clearance, holes, drop-offs, slope, water depth or safe footholds. It is not a route planner or a certified mobility/navigation system; do not use it to choose a path.
+
 ## GitHub Pages deployment
 
 The repository includes .github/workflows/deploy-pages.yml. On each push to main, it validates the static app, uploads the repository root as a Pages artifact and deploys it using the official Pages actions. Every run has a unique concurrency group and cancel-in-progress is false, so newer commits do not cancel earlier deployments.
