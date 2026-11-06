@@ -4,3 +4,5 @@ assert.ok(js.includes("function loadScript"),"Feature libraries should load on d
 assert.ok(js.includes("setupReveal"),"Scroll reveal animation must initialize");
 assert.ok(css.includes(".topbar{position:sticky;top:0;z-index:100"),"Header must remain visible while scrolling");
 assert.ok(css.includes(".reveal-panel.is-visible"),"Scroll reveal styles must exist");
+
+assert.ok(js.includes('if(!S.image){$("ocr-output").textContent=t("ocrUnavailable")'),"OCR must lazy-load Tesseract after image selection");
