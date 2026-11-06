@@ -159,20 +159,32 @@ body.high-contrast .terrain-results>section,.high-contrast .terrain-status{backg
 @media(prefers-reduced-motion:reduce){.core-reveal,.core-reveal.is-visible,.core-module{opacity:1;transform:none;transition:none}}body.reduce-motion .core-reveal,body.reduce-motion .core-reveal.is-visible{opacity:1;transform:none;transition:none}body.high-contrast .core-module,body.high-contrast .core-orchestrator,body.high-contrast .core-personalization,body.high-contrast .core-shared,body.high-contrast .core-output{background:#000;border:2px solid #fff}
 
 
-/* SYNVORA panel assembly reveal — replays on every page load and scroll entry. */
-.panel-assembly-reveal{position:relative;opacity:0;transform:translate3d(0,46px,0) scale(.975);filter:blur(3px);transition:opacity .72s ease,transform .88s cubic-bezier(.16,1,.3,1),filter .72s ease;will-change:opacity,transform;isolation:isolate}
+
+/* SYNVORA animated multi-cursor panel assembly v3 */
+.panel-assembly-reveal{position:relative!important;isolation:isolate;opacity:0;transform:translate3d(0,54px,0) scale(.965);filter:blur(5px);transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1),filter .7s ease;will-change:opacity,transform}
 .panel-assembly-reveal.is-assembled{opacity:1;transform:translate3d(0,0,0) scale(1);filter:none;will-change:auto}
-.panel-assembly-cursors{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:4;border-radius:inherit}
-.panel-assembly-cursor{position:absolute;display:flex;align-items:center;gap:5px;color:#8af7ff;font:800 9px/1 system-ui,sans-serif;letter-spacing:.08em;text-shadow:0 0 8px #4cecff,0 0 18px #4cecff;opacity:0;white-space:nowrap}
-.panel-assembly-cursor:before{content:"➤";font-size:24px;line-height:1;filter:drop-shadow(0 0 5px #4cecff)}
-.panel-assembly-cursor:nth-child(1){left:8px;top:8px;--dx:42px;--dy:28px;--rot:35deg}
-.panel-assembly-cursor:nth-child(2){right:8px;top:8px;--dx:-42px;--dy:28px;--rot:145deg}
-.panel-assembly-cursor:nth-child(3){left:50%;bottom:8px;--dx:0px;--dy:-34px;--rot:-90deg}
-.panel-assembly-reveal.is-assembling .panel-assembly-cursor{animation:panel-cursor-place .92s cubic-bezier(.2,.8,.2,1) both}
-.panel-assembly-reveal.is-assembling .panel-assembly-cursor:nth-child(2){animation-delay:.09s}
-.panel-assembly-reveal.is-assembling .panel-assembly-cursor:nth-child(3){animation-delay:.18s}
-@keyframes panel-cursor-place{0%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.65) rotate(var(--rot))}25%{opacity:1}72%{opacity:1;transform:translate(0,0) scale(1) rotate(var(--rot))}100%{opacity:0;transform:translate(0,0) scale(.85) rotate(var(--rot))}}
+.panel-assembly-cursors{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:30;border-radius:inherit}
+.panel-assembly-cursor{position:absolute;display:flex;align-items:flex-start;gap:5px;opacity:0;white-space:nowrap;filter:drop-shadow(0 0 8px currentColor);font:800 9px/1.2 ui-monospace,monospace;letter-spacing:.08em}
+.panel-assembly-cursor svg{width:28px;height:34px;flex:none;overflow:visible}
+.panel-assembly-cursor .cursor-tag{margin:9px 0 0 -2px;padding:4px 6px;border:1px solid currentColor;border-radius:4px;background:rgba(4,14,27,.88);box-shadow:0 0 12px currentColor}
+.panel-assembly-cursor:nth-child(1){left:10px;top:10px;color:#62f5ff;--from-x:-95px;--from-y:-75px;--to-x:0px;--to-y:0px;--cursor-rotate:-9deg}
+.panel-assembly-cursor:nth-child(2){right:10px;top:10px;color:#ff7bea;--from-x:105px;--from-y:-85px;--to-x:0px;--to-y:0px;--cursor-rotate:7deg}
+.panel-assembly-cursor:nth-child(3){left:42%;bottom:8px;color:#b7ff78;--from-x:8px;--from-y:95px;--to-x:0px;--to-y:0px;--cursor-rotate:-4deg}
+.panel-assembly-reveal.is-assembling .panel-assembly-cursor{animation:panel-cursor-place-v3 1.35s cubic-bezier(.18,.82,.22,1) both}
+.panel-assembly-reveal.is-assembling .panel-assembly-cursor:nth-child(2){animation-delay:.12s}
+.panel-assembly-reveal.is-assembling .panel-assembly-cursor:nth-child(3){animation-delay:.24s}
+.panel-assembly-reveal.is-assembling .panel-assembly-cursor:nth-child(1) .cursor-tag{animation:cursor-click-v3 .36s ease 1s both}
+.panel-assembly-reveal.is-assembling .panel-assembly-cursor:nth-child(2) .cursor-tag{animation:cursor-click-v3 .36s ease 1.12s both}
+.panel-assembly-reveal.is-assembling .panel-assembly-cursor:nth-child(3) .cursor-tag{animation:cursor-click-v3 .36s ease 1.24s both}
+@keyframes panel-cursor-place-v3{
+  0%{opacity:0;transform:translate(var(--from-x),var(--from-y)) rotate(var(--cursor-rotate)) scale(.72)}
+  18%{opacity:1}
+  68%{opacity:1;transform:translate(var(--to-x),var(--to-y)) rotate(0) scale(1)}
+  82%{opacity:1;transform:translate(var(--to-x),var(--to-y)) scale(.9)}
+  100%{opacity:0;transform:translate(var(--to-x),var(--to-y)) scale(.9)}
+}
+@keyframes cursor-click-v3{0%{box-shadow:0 0 0 currentColor;transform:scale(1)}45%{box-shadow:0 0 0 7px color-mix(in srgb,currentColor 35%,transparent),0 0 22px currentColor;transform:scale(.92)}100%{box-shadow:0 0 12px currentColor;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.panel-assembly-reveal,.panel-assembly-reveal.is-assembled{opacity:1;transform:none;filter:none;transition:none;will-change:auto}.panel-assembly-cursors{display:none}}
 body.reduce-motion .panel-assembly-reveal,body.reduce-motion .panel-assembly-reveal.is-assembled{opacity:1;transform:none;filter:none;transition:none;will-change:auto}
 body.reduce-motion .panel-assembly-cursors{display:none}
-body.high-contrast .panel-assembly-cursor{color:#fff;text-shadow:none}
+body.high-contrast .panel-assembly-cursor .cursor-tag{background:#000;border:2px solid #fff;color:#fff;box-shadow:none}
