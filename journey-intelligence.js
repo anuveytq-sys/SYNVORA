@@ -53,7 +53,7 @@ async function fetchNearby(intent,origin){
    return items.sort((a,b)=>a.straight-b.straight);
   }finally{clearTimeout(timer)}
  })());
- try{return await Promise.any(jobs)}catch(e){
+ try{const found=await Promise.any(jobs);controllers.forEach(x=>x.abort());return found}catch(e){
   const q2=encodeURIComponent(intent.label),url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=10&addressdetails=1&viewbox="+box(origin.lat,origin.lon,10)+"&bounded=1&q="+q2;
   try{
    const r=await fetch(url,{headers:{Accept:"application/json"},signal:AbortSignal.timeout(14000)});
