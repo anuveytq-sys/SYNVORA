@@ -2,7 +2,7 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f">
 <meta name="description" content="SYNVORA ECHO accessible visual perception workspace"><title>SYNVORA — ECHO</title>
-<link rel="stylesheet" href="./styles.css?v=stage6-gaze-r1">
+<link rel="stylesheet" href="./styles.css?v=stage6-gaze-r2">
 <script defer src="./model-manager.js?v=stable-fix-20261106-r1"></script><script defer src="./camera-manager.js?v=stable-fix-20261106-r1"></script><script defer src="./app.js?v=stable-fix-20261106-r1"></script><script defer src="./civiclens.js?v=stable-fix-20261106-r1"></script><script defer src="./formgenius.js?v=terrain-stage4-r1"></script><script defer src="./terrain-ai.js?v=terrain-stage4-r1"></script><script defer src="./live-route.js?v=terrain-stage4-r1"></script><script defer src="./core.js?v=stage5-core-r1"></script><script defer src="./panel-assembly.js?v=stage5-panel-assembly-r4"></script></head><body>
 <a class="skip-link" href="#workspace" data-i18n="skip">Skip to workspace</a>
 <header class="topbar" role="banner"><a class="brand" href="./"><span class="brand-mark">S</span><span>SYNVORA<small>ACCESSIBILITY INTELLIGENCE</small></span></a>
@@ -132,10 +132,10 @@
   <div class="controls"><button type="button" class="primary" id="gaze-start">Start tracking</button><button type="button" id="gaze-stop" disabled>Stop</button></div>
   <label for="gaze-mode">Pointer control</label><select id="gaze-mode"><option value="eye">Eye gaze (iris tracking)</option><option value="head">Head movement</option></select>
   <div class="controls"><button type="button" id="gaze-calibrate" disabled>Calibrate centre</button><button type="button" id="gaze-recenter" disabled>Re-centre</button></div>
-  <label class="check-label"><input type="checkbox" id="gaze-blink" checked><span>Blink to click (deliberate long blink)</span></label>
-  <label class="check-label"><input type="checkbox" id="gaze-dwell" checked><span>Dwell scrolling</span></label>
-  <label class="check-label"><input type="checkbox" id="gaze-edge" checked><span>Top/bottom edge auto-scroll</span></label>
-  <label class="check-label"><input type="checkbox" id="gaze-map" checked><span>Move OpenStreetMap with gaze/head</span></label>
+  <label class="check-label"><input type="checkbox" id="gaze-blink" checked><span>Blink to click (hold both eyes closed for about ⅓ second)</span></label>
+  <label class="check-label"><input type="checkbox" id="gaze-dwell"><span>Dwell scrolling (only after pointer becomes still)</span></label>
+  <label class="check-label"><input type="checkbox" id="gaze-edge"><span>Top/bottom edge auto-scroll</span></label>
+  <label class="check-label"><input type="checkbox" id="gaze-map"><span>Move OpenStreetMap with gaze/head</span></label>
   <label for="gaze-dwell-time">Dwell delay <output id="gaze-dwell-value">1.2 s</output></label><input id="gaze-dwell-time" type="range" min="600" max="2500" step="100" value="1200">
   <label for="gaze-speed">Pointer sensitivity <output id="gaze-speed-value">1.0×</output></label><input id="gaze-speed" type="range" min="60" max="160" step="5" value="100">
   <p class="muted small" id="gaze-status" role="status" aria-live="polite">Tracking is off. Use a stable camera position and calibrate before use.</p>
