@@ -4,7 +4,7 @@
   "private": true,
   "description": "SYNVORA ECHO, CIVICLENS and FORMGENIUS accessibility workspace",
   "scripts": {
-    "check": "node --check app.js && node --check civiclens.js && node --check formgenius.js && node --check model-manager.js && node --check camera-manager.js && node --check terrain-ai.js && node --check live-route.js && node --check core.js && node --check panel-assembly.js && node --check gaze-control.js && node --check tests/smoke.js",
+    "check": "node --check app.js && node --check civiclens.js && node --check formgenius.js && node --check model-manager.js && node --check camera-manager.js && node --check terrain-ai.js && node --check live-route.js && node --check core.js && node --check panel-assembly.js && node --check gaze-control.js && node --check journey-intelligence.js && node --check surface-vision.js && node --check tests/smoke.js",
     "test": "npm run check && node tests/smoke.js"
   }
 }
