@@ -26,6 +26,7 @@ function mount(){
  <label for="synvora-ai-model">Model ID</label><input id="synvora-ai-model" list="synvora-ai-models" value="openrouter/free" placeholder="provider/model:free"><datalist id="synvora-ai-models"><option value="openrouter/free"><option value="meta-llama/llama-3.3-70b-instruct:free"><option value="google/gemma-3-27b-it:free"></datalist>
  <div class="ai-row"><button type="button" class="primary" id="synvora-ai-test">Test configuration</button><button type="button" id="synvora-ai-save">Save configuration</button><button type="button" id="synvora-ai-clear">Clear key</button></div>
  <p class="ai-status" id="synvora-ai-status" role="status" aria-live="polite">Not connected. Add a key, test it, then save.</p>
+ <label class="check-label" style="display:flex!important;align-items:flex-start!important;gap:8px!important"><input id="synvora-ai-include-text" type="checkbox" style="width:auto;flex:0 0 auto"><span>For this request, allow AI to read the current ECHO OCR text and FORMGENIUS document text. Leave off for private documents.</span></label>
  <div class="eyebrow" style="margin-top:18px">ECHO · CIVICLENS · FORMGENIUS · TERRAIN AI · CORE</div>
  <div id="synvora-ai-log" class="ai-chat-log" aria-live="polite"><div class="ai-message">Ask SYNVORA to explain the current workspace, summarize available module status, or suggest a supported action.</div></div>
  <form id="synvora-ai-form"><label for="synvora-ai-query">Ask SYNVORA AI</label><textarea id="synvora-ai-query" maxlength="1800" placeholder="Example: Explain my current results and open the document workspace."></textarea><div class="ai-row"><button class="primary" id="synvora-ai-send" type="submit">Ask AI</button><button id="synvora-ai-apply" type="button" disabled>Apply suggested actions</button></div></form>
@@ -51,9 +52,9 @@ function moduleContext(){
  return {
   app:"SYNVORA ECHO accessibility workspace",
   modules:{
-   ECHO:{state:val("input-state"),detections:val("detections"),sceneSummary:val("scene-summary"),ocrAvailable:!!val("ocr-output")&&!/Extracted text will appear/i.test(val("ocr-output"))},
-   CIVICLENS:{state:val("civic-status"),mappedFeatureCount:val("civic-count"),filters:checks,journeySummary:val("journey-result")},
-   FORMGENIUS:{state:val("fg-status"),pages:val("fg-pages"),reviewProgress:val("fg-completion"),serviceCategory:$("fg-service")?.value||"unknown"},
+   ECHO:{state:val("input-state"),detections:val("detections"),sceneSummary:val("scene-summary"),ocrAvailable:!!val("ocr-output")&&!/Extracted text will appear/i.test(val("ocr-output")),ocrText:$("synvora-ai-include-text")?.checked?val("ocr-output").slice(0,5000):undefined},
+   CIVICLENS:{state:val("civic-status"),mappedFeatureCount:val("civic-count"),filters:checks,routeResultAvailable:!!val("journey-result")&&!/will appear here/i.test(val("journey-result"))},
+   FORMGENIUS:{state:val("fg-status"),pages:val("fg-pages"),reviewProgress:val("fg-completion"),serviceCategory:$("fg-service")?.value||"unknown",documentText:$("synvora-ai-include-text")?.checked?val("fg-text").slice(0,5000):undefined},
    TERRAIN_AI:{state:val("terrain-status"),variation:val("terrain-variation"),regions:val("terrain-regions")},
    CORE:{state:val("core-state"),summary:val("core-output")}
   },
