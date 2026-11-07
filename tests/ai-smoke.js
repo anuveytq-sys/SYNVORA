@@ -9,7 +9,7 @@ for(const forbidden of ["camera-start","gaze-start","emergency-save","emergency-
 assert.ok(assembly.includes("synvora-ai.js?v=ai-main-panel-r2")&&assembly.includes("loadAI"),"AI panel loader is not cache-busted");
 assert.ok(html.includes('id="settings-panel"')&&html.includes('id="settings-toggle"'),"Existing settings panel wiring is missing");
 for(const word of ["pond","lake","river","school","bank","police station","fire station","park","restaurant","supermarket","hotel"])assert.ok(journey.includes('label:"'+word+'"'),"Missing intent category: "+word);
-assert.ok(journey.includes("Promise.any")&&journey.includes("nominatim.openstreetmap.org")&&journey.includes("AbortSignal.timeout(16000)"),"Nearby search resilience fallback missing");
+assert.ok(journey.includes("Promise.any")&&journey.includes("nominatim.openstreetmap.org")&&journey.includes("setTimeout(()=>controllers[i].abort(),16000)"),"Nearby search resilience fallback missing");
 assert.ok(journey.includes('synvora:journey-search')&&civic.includes("synvora:journey-search"),"CIVICLENS search does not forward nearby intents to Intent Navigation");
 assert.ok(!civic.includes("Map data unavailable from the primary and backup OpenStreetMap services"),"Old fatal OpenStreetMap outage message remains");
 console.log("SYNVORA AI, category search and map fallback smoke checks passed.");
