@@ -1,17 +1,100 @@
 (()=>{"use strict";
-const $=id=>document.getElementById(id),S={stream:null,landmarker:null,raf:0,lastDetect:0,active:false,closedSince:0,blinkLatched:false,lastClick:0,lastPan:0,lastX:null,lastY:null,calX:.5,calY:.5,targetX:innerWidth/2,targetY:innerHeight/2,x:innerWidth/2,y:innerHeight/2,faceLost:0,stillSince:0,lastEdge:0};
+const $=id=>document.getElementById(id);
+const S={stream:null,landmarker:null,raf:0,lastDetect:0,active:false,closedSince:0,blinkLatched:false,lastClick:0,lastPan:0,lastX:null,lastY:null,calX:.5,calY:.5,targetX:innerWidth/2,targetY:innerHeight/2,x:innerWidth/2,y:innerHeight/2,faceLost:0,stillSince:0,lastEdge:0};
 const video=$("gaze-video"),cursor=$("gaze-cursor"),clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),smooth=(a,b,k)=>a+(b-a)*k;
 const status=(m,e=false)=>{$("gaze-status").textContent=m;$("gaze-state").textContent=e?"ERROR":S.active?"TRACKING":"OFF"};
 function eyeRatio(l,u,d,o,i){return Math.abs(l[u].y-l[d].y)/Math.max(.001,Math.abs(l[o].x-l[i].x))}
-function readFace(l){const n=l[1],li=l[468],ri=l[473];if(!n||!li||!ri)return null;let x,y;if($("gaze-mode").value==="head"){x=(n.x-l[234].x)/Math.max(.001,l[454].x-l[234].x);y=(n.y-l[10].y)/Math.max(.001,l[152].y-l[10].y)}else{x=1-((li.x-l[33].x)/Math.max(.001,l[133].x-l[33].x)+(ri.x-l[362].x)/Math.max(.001,l[263].x-l[362].x))/2;y=((li.y-l[159].y)/Math.max(.001,l[145].y-l[159].y)+(ri.y-l[386].y)/Math.max(.001,l[374].y-l[386].y))/2}return{x:clamp(x,0,1),y:clamp(y,0,1),bothClosed:eyeRatio(l,159,145,33,133)<.125&&eyeRatio(l,386,374,362,263)<.125}}
+function readFace(l,result){
+ const n=l[1];if(!n)return null;let x,y;
+ if($("gaze-mode").value==="head"){
+  const width=Math.max(.001,l[454].x-l[234].x);
+  x=1-((n.x-l[234].x)/width);
+  y=(n.y-l[10].y)/Math.max(.001,l[152].y-l[10].y);
+ }else{
+  const li=l[468],ri=l[473];if(!li||!ri)return null;
+  x=1-((li.x-l[33].x)/Math.max(.001,l[133].x-l[33].x)+(ri.x-l[362].x)/Math.max(.001,l[263].x-l[362].x))/2;
+  y=((li.y-l[159].y)/Math.max(.001,l[145].y-l[159].y)+(ri.y-l[386].y)/Math.max(.001,l[374].y-l[386].y))/2;
+ }
+ const cats=result?.faceBlendshapes?.[0]?.categories||[];
+ const score=name=>cats.find(c=>c.categoryName===name)?.score??0;
+ const bothClosed=score("eyeBlinkLeft")>.58&&score("eyeBlinkRight")>.58;
+ return{x:clamp(x,0,1),y:clamp(y,0,1),bothClosed};
+}
 function draw(){cursor.style.transform="translate3d("+S.x+"px,"+S.y+"px,0) translate(-50%,-50%)"}
-function blinkClick(){const now=performance.now();if(now-S.lastClick<1000)return;const el=document.elementFromPoint(S.x,S.y),t=el?.closest("button,a,input,select,label,[role=button]");if(!t||t.disabled||t.getAttribute("aria-disabled")==="true")return;t.click();S.lastClick=now;status("Blink click activated: "+(t.getAttribute("aria-label")||t.textContent.trim().slice(0,26)||"control"))}
+function blinkClick(){
+ const now=performance.now();if(now-S.lastClick<850)return false;
+ const candidates=document.elementsFromPoint(S.x,S.y);
+ let target=null;
+ for(const el of candidates){if(el===cursor||el.closest?.("#gaze-cursor"))continue;target=el.closest?.('button,a[href],input,select,label,[role="button"],[tabindex]:not([tabindex="-1"])');if(target)break}
+ if(!target||target.disabled||target.getAttribute("aria-disabled")==="true"||target.getAttribute("aria-hidden")==="true")return false;
+ target.focus?.({preventScroll:true});target.click();S.lastClick=now;
+ status("Blink click: "+(target.getAttribute("aria-label")||target.textContent.trim().slice(0,32)||"control"));return true;
+}
 function mapPan(now,dx,dy){const el=document.elementFromPoint(S.x,S.y),mapEl=el?.closest("#civic-map"),map=window.SYNVORA_CIVIC_MAP?.getMap?.();if(!mapEl||!map||!$("gaze-map").checked||now-S.lastPan<80||Math.hypot(dx,dy)<2.5)return;map.panBy([clamp(dx*1.2,-18,18),clamp(dy*1.2,-18,18)],{animate:false});S.lastPan=now}
 function edgeScroll(now){if(!$("gaze-edge").checked)return;const edge=46,z=S.y<edge?"top":S.y>innerHeight-edge?"bottom":null;if(!z||now-S.lastEdge<90)return;const a=clamp((z==="top"?edge-S.y:S.y-(innerHeight-edge))*.12,1,8);window.scrollBy({top:z==="top"?-a:a,behavior:"auto"});S.lastEdge=now}
 function dwellScroll(now,dx,dy){if(!$("gaze-dwell").checked){S.stillSince=0;return}if(Math.hypot(dx,dy)>2.2){S.stillSince=0;return}if(!S.stillSince){S.stillSince=now;return}if(now-S.stillSince<Number($("gaze-dwell-time").value))return;const el=document.elementFromPoint(S.x,S.y),box=el?.closest(".settings-panel,.civic-results,.fg-fields,.core-output,.terrain-results");if(box&&box.scrollHeight>box.clientHeight+8){box.scrollBy({top:110,behavior:"smooth"});S.stillSince=now+1100}else S.stillSince=now}
-function frame(now){if(!S.active)return;if(now-S.lastDetect>70&&S.landmarker&&video.readyState>=2){S.lastDetect=now;try{const lm=S.landmarker.detectForVideo(video,now).faceLandmarks?.[0];if(lm){S.faceLost=0;const p=readFace(lm);if(p){const v=Number($("gaze-speed").value)/100;S.targetX=clamp(innerWidth*(.5+(p.x-S.calX)*1.45*v),8,innerWidth-8);S.targetY=clamp(innerHeight*(.5+(p.y-S.calY)*1.45*v),8,innerHeight-8);if(p.bothClosed&&$("gaze-blink").checked){if(!S.closedSince)S.closedSince=now;if(now-S.closedSince>=330&&!S.blinkLatched){blinkClick();S.blinkLatched=true}}else{S.closedSince=0;S.blinkLatched=false}}}else{S.closedSince=0;if(++S.faceLost===8)status("Face lost; pointer and gestures paused.")}}catch(e){status("Tracking frame error: "+e.message,true)}}if(S.faceLost<8){const ox=S.x,oy=S.y;S.x=smooth(S.x,S.targetX,.16);S.y=smooth(S.y,S.targetY,.16);if(Math.hypot(S.x-ox,S.y-oy)<.35){S.x=ox;S.y=oy}draw();const dx=S.x-(S.lastX??S.x),dy=S.y-(S.lastY??S.y);mapPan(now,dx,dy);edgeScroll(now);dwellScroll(now,dx,dy);S.lastX=S.x;S.lastY=S.y}S.raf=requestAnimationFrame(frame)}
-async function start(){if(S.active)return;if(!navigator.mediaDevices?.getUserMedia){status("Camera access requires HTTPS and a supported browser.",true);return}$("gaze-start").disabled=true;status("Loading on-device face tracking…");try{const v=await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm"),fs=await v.FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");S.landmarker=await v.FaceLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",delegate:"CPU"},runningMode:"VIDEO",numFaces:1,outputFaceBlendshapes:false,outputFacialTransformationMatrixes:false});S.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:"user",width:{ideal:640},height:{ideal:480},frameRate:{ideal:20,max:24}}});video.srcObject=S.stream;await video.play();S.active=true;S.faceLost=0;S.closedSince=0;S.stillSince=0;$("gaze-start").disabled=true;$("gaze-stop").disabled=false;$("gaze-calibrate").disabled=false;$("gaze-recenter").disabled=false;cursor.hidden=false;status("Tracking active. Calibrate centre; all automatic scrolling starts OFF.");S.raf=requestAnimationFrame(frame)}catch(e){stop();status("Could not start tracking: "+String(e.message||e).slice(0,140),true)}}
-function stop(){S.active=false;cancelAnimationFrame(S.raf);S.stream?.getTracks().forEach(t=>t.stop());S.stream=null;video.srcObject=null;try{S.landmarker?.close()}catch{}S.landmarker=null;cursor.hidden=true;$("gaze-start").disabled=false;$("gaze-stop").disabled=true;$("gaze-calibrate").disabled=true;$("gaze-recenter").disabled=true;S.lastX=S.lastY=null;S.closedSince=0;S.blinkLatched=false;S.stillSince=0;status("Tracking stopped. Camera released.")}
-// Calibrate centre before using pointer gestures.\nfunction calibrate(){if(!S.landmarker||video.readyState<2)return;try{const lm=S.landmarker.detectForVideo(video,performance.now()).faceLandmarks?.[0];if(!lm)return status("Face not detected. Centre your face and retry.",true);const p=readFace(lm);S.calX=p.x;S.calY=p.y;S.targetX=S.x=innerWidth/2;S.targetY=S.y=innerHeight/2;S.lastX=S.lastY=null;S.stillSince=0;draw();status("Centre calibrated. Make small, deliberate movements.")}catch(e){status("Calibration failed: "+e.message,true)}}
-$("gaze-start").addEventListener("click",start);$("gaze-stop").addEventListener("click",stop);$("gaze-calibrate").addEventListener("click",calibrate);$("gaze-recenter").addEventListener("click",()=>{S.targetX=S.x=innerWidth/2;S.targetY=S.y=innerHeight/2;S.lastX=S.lastY=null;S.stillSince=0;draw();status("Pointer re-centred.")});$("gaze-dwell-time").addEventListener("input",e=>$("gaze-dwell-value").value=(Number(e.target.value)/1000).toFixed(1)+" s");$("gaze-speed").addEventListener("input",e=>$("gaze-speed-value").value=(Number(e.target.value)/100).toFixed(1)+"×");$("gaze-mode").addEventListener("change",()=>{if(S.active)calibrate()});window.addEventListener("pagehide",stop);document.addEventListener("visibilitychange",()=>{if(document.hidden&&S.active)stop()});
+function frame(now){
+ if(!S.active)return;
+ if(now-S.lastDetect>55&&S.landmarker&&video.readyState>=2){
+  S.lastDetect=now;
+  try{
+   const result=S.landmarker.detectForVideo(video,now),lm=result.faceLandmarks?.[0];
+   if(lm){
+    S.faceLost=0;const p=readFace(lm,result);
+    if(p){
+     const v=Number($("gaze-speed").value)/100;
+     S.targetX=clamp(innerWidth*(.5+(p.x-S.calX)*2.0*v),8,innerWidth-8);
+     S.targetY=clamp(innerHeight*(.5+(p.y-S.calY)*2.0*v),8,innerHeight-8);
+     if(p.bothClosed&&$("gaze-blink").checked){
+      if(!S.closedSince)S.closedSince=now;
+      if(now-S.closedSince>=190&&!S.blinkLatched){blinkClick();S.blinkLatched=true}
+     }else{S.closedSince=0;S.blinkLatched=false}
+    }
+   }else{S.closedSince=0;if(++S.faceLost===8)status("Face lost; pointer and gestures paused.")}
+  }catch(e){status("Tracking frame error: "+e.message,true)}
+ }
+ if(S.faceLost<8){
+  const ox=S.x,oy=S.y;S.x=smooth(S.x,S.targetX,.28);S.y=smooth(S.y,S.targetY,.28);
+  if(Math.hypot(S.x-ox,S.y-oy)<.2){S.x=ox;S.y=oy}
+  draw();const dx=S.x-(S.lastX??S.x),dy=S.y-(S.lastY??S.y);
+  mapPan(now,dx,dy);edgeScroll(now);dwellScroll(now,dx,dy);S.lastX=S.x;S.lastY=S.y;
+ }
+ S.raf=requestAnimationFrame(frame);
+}
+async function start(){
+ if(S.active)return;if(!navigator.mediaDevices?.getUserMedia){status("Camera access requires HTTPS and a supported browser.",true);return}
+ $("gaze-start").disabled=true;status("Loading on-device face tracking…");
+ try{
+  const v=await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm");
+  const fs=await v.FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+  S.landmarker=await v.FaceLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",delegate:"CPU"},runningMode:"VIDEO",numFaces:1,outputFaceBlendshapes:true,outputFacialTransformationMatrixes:false});
+  S.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:"user",width:{ideal:640},height:{ideal:480},frameRate:{ideal:24,max:30}}});
+  video.srcObject=S.stream;await video.play();S.active=true;S.faceLost=0;S.closedSince=0;S.stillSince=0;
+  $("gaze-start").disabled=true;$("gaze-stop").disabled=false;$("gaze-calibrate").disabled=false;$("gaze-recenter").disabled=false;cursor.hidden=false;
+  status("Tracking active. Calibrate centre. Head movement is mirrored to match the preview.");S.raf=requestAnimationFrame(frame);
+ }catch(e){stop();status("Could not start tracking: "+String(e.message||e).slice(0,140),true)}
+}
+function stop(){
+ S.active=false;cancelAnimationFrame(S.raf);S.stream?.getTracks().forEach(t=>t.stop());S.stream=null;video.srcObject=null;
+ try{S.landmarker?.close()}catch{}S.landmarker=null;cursor.hidden=true;
+ $("gaze-start").disabled=false;$("gaze-stop").disabled=true;$("gaze-calibrate").disabled=true;$("gaze-recenter").disabled=true;
+ S.lastX=S.lastY=null;S.closedSince=0;S.blinkLatched=false;S.stillSince=0;status("Tracking stopped. Camera released.");
+}
+function calibrate(){
+ if(!S.landmarker||video.readyState<2)return;
+ try{
+  const result=S.landmarker.detectForVideo(video,performance.now()),lm=result.faceLandmarks?.[0];
+  if(!lm)return status("Face not detected. Centre your face and retry.",true);
+  const p=readFace(lm,result);S.calX=p.x;S.calY=p.y;
+  S.targetX=S.x=innerWidth/2;S.targetY=S.y=innerHeight/2;S.lastX=S.lastY=null;S.stillSince=0;draw();
+  status("Centre calibrated. Move your head right to move the pointer right.");
+ }catch(e){status("Calibration failed: "+e.message,true)}
+}
+$("gaze-start").addEventListener("click",start);$("gaze-stop").addEventListener("click",stop);
+$("gaze-calibrate").addEventListener("click",calibrate);
+$("gaze-recenter").addEventListener("click",()=>{S.targetX=S.x=innerWidth/2;S.targetY=S.y=innerHeight/2;S.lastX=S.lastY=null;S.stillSince=0;draw();status("Pointer re-centred.")});
+$("gaze-dwell-time").addEventListener("input",e=>$("gaze-dwell-value").value=(Number(e.target.value)/1000).toFixed(1)+" s");
+$("gaze-speed").addEventListener("input",e=>$("gaze-speed-value").value=(Number(e.target.value)/100).toFixed(1)+"×");
+$("gaze-mode").addEventListener("change",()=>{if(S.active)calibrate()});
+window.addEventListener("pagehide",stop);document.addEventListener("visibilitychange",()=>{if(document.hidden&&S.active)stop()});
 })();
