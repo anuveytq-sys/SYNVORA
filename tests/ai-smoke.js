@@ -10,6 +10,9 @@ assert.ok(assembly.includes("synvora-ai.js?v=ai-main-panel-r2")&&assembly.includ
 assert.ok(html.includes('id="settings-panel"')&&html.includes('id="settings-toggle"'),"Existing settings panel wiring is missing");
 for(const word of ["pond","lake","river","school","bank","police station","fire station","park","restaurant","supermarket","hotel"])assert.ok(journey.includes('label:"'+word+'"'),"Missing intent category: "+word);
 assert.ok(journey.includes("Promise.any")&&journey.includes("nominatim.openstreetmap.org")&&journey.includes("setTimeout(()=>controllers[i].abort(),16000)"),"Nearby search resilience fallback missing");
+assert.ok(journey.includes("async function snapToRoad(origin)")&&journey.includes("/nearest/v1/")&&journey.includes("distance>1200"),"Off-road GPS must snap to a nearby routable road with a bounded connector");
+assert.ok(journey.includes("routeBetween(routeStart,candidate)")&&journey.includes("fetchNearby(intent,routeStart)")&&journey.includes("geocodeDestination(q,routeStart)"),"Destination search and routing must fall back to the nearest road origin");
+assert.ok(journey.includes("GPS-to-road access connector")&&journey.includes('dashArray:"3 9"')&&journey.includes("actual ground path before walking"),"Map must distinguish the dashed GPS-to-road access connector from the pedestrian route");
 assert.ok(journey.includes('synvora:journey-search')&&civic.includes("synvora:journey-search"),"CIVICLENS search does not forward nearby intents to Intent Navigation");
 assert.ok(!civic.includes("Map data unavailable from the primary and backup OpenStreetMap services"),"Old fatal OpenStreetMap outage message remains");
 console.log("SYNVORA AI, category search and map fallback smoke checks passed.");
