@@ -8,7 +8,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: synvora-pages-${{ github.run_id }}-${{ github.run_attempt }}
+  group: synvora-pages
   cancel-in-progress: false
 jobs:
   build:
