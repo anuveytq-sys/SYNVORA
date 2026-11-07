@@ -26,6 +26,7 @@ jobs:
           test -s civic-ai.js
           test -s civic-cloud.js
           test -s live-route.js
+          test -s synvora-ai.js
           npm test
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
