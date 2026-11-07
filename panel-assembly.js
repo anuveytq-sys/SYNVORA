@@ -10,7 +10,7 @@ const TARGETS=[
 ].join(",");
 const labels=["NODE 01 · ALIGN","NODE 02 · DOCK","NODE 03 · LOCK"];
 function cursorMarkup(){return '<svg viewBox="0 0 28 34" aria-hidden="true"><path d="M3 2 L3 26 L9 20 L14 31 L19 28 L14 17 L23 17 Z" fill="currentColor" stroke="#07111f" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 2 L23 17" stroke="#fff" stroke-opacity=".9" stroke-width=".8"/></svg>'}
-function loadAI(){if(document.querySelector('script[data-synvora-ai]'))return;const s=document.createElement("script");s.src="./synvora-ai.js?v=ai-control-r1";s.async=true;s.dataset.synvoraAi="true";document.head.append(s)}
+function loadAI(){if(document.querySelector('script[data-synvora-ai]'))return;const s=document.createElement("script");s.src="./synvora-ai.js?v=ai-main-panel-r2";s.async=true;s.dataset.synvoraAi="true";document.head.append(s)}
 function init(){
  const panels=[...new Set(document.querySelectorAll(TARGETS))];
  const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches||document.body.classList.contains("reduce-motion");
