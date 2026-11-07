@@ -89,6 +89,17 @@ Run npm test. The test checks JavaScript syntax and verifies ECHO, CIVICLENS, FO
 4. **TERRAIN AI — Environment awareness:** experimental relative-depth visual awareness and uncertainty cues only; not route or foothold guidance.
 5. **CORE — Unified ecosystem:** connect the modules through a coordinated, privacy-conscious platform.
 
+
+## Stage 6 — Hands-free interaction
+
+- Scrollable SYNVORA Control Deck opened from the top-right menu.
+- Optional head-pointer mode and iris-based eye-gaze pointer mode using MediaPipe Face Landmarker in the browser.
+- Explicit camera start/stop, centre calibration, re-centering, sensitivity control and a local preview.
+- Optional deliberate long-blink click, configurable dwell scrolling, top/bottom edge scrolling, and gaze-driven OpenStreetMap panning while the pointer is over the map.
+- Camera access is requested only after the user selects Start tracking. Frames and landmarks are processed in the browser; there is no recording, upload, account or backend.
+- The feature depends on a compatible browser, camera permission, network access for the MediaPipe runtime/model on first load, stable lighting and device performance. Tracking precision varies by camera and user; calibrate before use. Keep touch/keyboard controls available. Blink/dwell input is experimental and may misfire; it is not a medical or diagnostic tool.
+- Tracking stops and releases the camera when the page is hidden or unloaded. It does not run in the background.
+
 ## License
 
 MIT. See LICENSE.
