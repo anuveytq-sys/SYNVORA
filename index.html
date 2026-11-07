@@ -2,7 +2,7 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f">
 <meta name="description" content="SYNVORA ECHO accessible visual perception workspace"><title>SYNVORA — ECHO</title>
-<link rel="stylesheet" href="./styles.css?v=stage5-panel-assembly-r4">
+<link rel="stylesheet" href="./styles.css?v=stage6-gaze-r1">
 <script defer src="./model-manager.js?v=stable-fix-20261106-r1"></script><script defer src="./camera-manager.js?v=stable-fix-20261106-r1"></script><script defer src="./app.js?v=stable-fix-20261106-r1"></script><script defer src="./civiclens.js?v=stable-fix-20261106-r1"></script><script defer src="./formgenius.js?v=terrain-stage4-r1"></script><script defer src="./terrain-ai.js?v=terrain-stage4-r1"></script><script defer src="./live-route.js?v=terrain-stage4-r1"></script><script defer src="./core.js?v=stage5-core-r1"></script><script defer src="./panel-assembly.js?v=stage5-panel-assembly-r4"></script></head><body>
 <a class="skip-link" href="#workspace" data-i18n="skip">Skip to workspace</a>
 <header class="topbar" role="banner"><a class="brand" href="./"><span class="brand-mark">S</span><span>SYNVORA<small>ACCESSIBILITY INTELLIGENCE</small></span></a>
@@ -122,6 +122,26 @@
  <p class="model-note">SYNVORA helps organise information; it does not submit applications, certify eligibility, provide legal advice, or guarantee that a form is complete. Review every extracted value against the original document.</p>
 </section>
 </main>
-<aside id="settings-panel" class="settings-panel" hidden aria-labelledby="settings-title"><div class="card-head"><h2 id="settings-title" data-i18n="quickSettings">Quick settings</h2><button id="settings-close" aria-label="Close settings">✕</button></div>
-<label class="check-label"><input type="checkbox" id="reduce-motion"><span data-i18n="reduceMotion">Reduce motion</span></label><label class="check-label"><input type="checkbox" id="keyboard-mode"><span data-i18n="keyboardFocus">Strong keyboard focus</span></label><p class="muted small" data-i18n="keyboardHelp">Use Tab, Shift+Tab, Enter and Space to navigate. Press Escape to close this panel.</p></aside>
+<aside id="settings-panel" class="settings-panel" hidden aria-labelledby="settings-title" tabindex="-1">
+ <div class="card-head"><div><div class="eyebrow">SYNVORA CONTROL DECK</div><h2 id="settings-title" data-i18n="quickSettings">Quick settings</h2></div><button id="settings-close" aria-label="Close settings">✕</button></div>
+ <section class="control-section"><h3>Display & accessibility</h3><label class="check-label"><input type="checkbox" id="reduce-motion"><span data-i18n="reduceMotion">Reduce motion</span></label><label class="check-label"><input type="checkbox" id="keyboard-mode"><span data-i18n="keyboardFocus">Strong keyboard focus</span></label><p class="muted small" data-i18n="keyboardHelp">Use Tab, Shift+Tab, Enter and Space to navigate. Press Escape to close this panel.</p></section>
+ <section class="control-section" id="gaze-control" aria-labelledby="gaze-title">
+  <div class="control-title"><div><div class="eyebrow">HANDS-FREE INPUT</div><h3 id="gaze-title">Head & eye tracking</h3></div><span class="pill" id="gaze-state" role="status" aria-live="polite">OFF</span></div>
+  <p class="muted small">On-device face landmarks move an on-screen pointer. Camera access starts only when you press Start. Video is processed locally and is not recorded or uploaded.</p>
+  <div class="gaze-preview-wrap"><video id="gaze-video" autoplay muted playsinline aria-label="Local head and eye tracking preview"></video><div class="gaze-crosshair" aria-hidden="true">◎</div></div>
+  <div class="controls"><button type="button" class="primary" id="gaze-start">Start tracking</button><button type="button" id="gaze-stop" disabled>Stop</button></div>
+  <label for="gaze-mode">Pointer control</label><select id="gaze-mode"><option value="eye">Eye gaze (iris tracking)</option><option value="head">Head movement</option></select>
+  <div class="controls"><button type="button" id="gaze-calibrate" disabled>Calibrate centre</button><button type="button" id="gaze-recenter" disabled>Re-centre</button></div>
+  <label class="check-label"><input type="checkbox" id="gaze-blink" checked><span>Blink to click (deliberate long blink)</span></label>
+  <label class="check-label"><input type="checkbox" id="gaze-dwell" checked><span>Dwell scrolling</span></label>
+  <label class="check-label"><input type="checkbox" id="gaze-edge" checked><span>Top/bottom edge auto-scroll</span></label>
+  <label class="check-label"><input type="checkbox" id="gaze-map" checked><span>Move OpenStreetMap with gaze/head</span></label>
+  <label for="gaze-dwell-time">Dwell delay <output id="gaze-dwell-value">1.2 s</output></label><input id="gaze-dwell-time" type="range" min="600" max="2500" step="100" value="1200">
+  <label for="gaze-speed">Pointer sensitivity <output id="gaze-speed-value">1.0×</output></label><input id="gaze-speed" type="range" min="60" max="160" step="5" value="100">
+  <p class="muted small" id="gaze-status" role="status" aria-live="polite">Tracking is off. Use a stable camera position and calibrate before use.</p>
+  <p class="muted small">Blink clicks can be affected by natural blinks and lighting. Keep physical keyboard/touch controls available. Eye tracking is an experimental accessibility input, not a medical or diagnostic tool.</p>
+ </section>
+</aside>
+<div id="gaze-cursor" aria-hidden="true" hidden><span></span></div>
+<script defer src="./gaze-control.js?v=stage6-gaze-r1"></script>
 <footer><span>SYNVORA · ECHO · STAGE 01</span><span data-i18n="safetyFooter">Assistive information only. Never rely on this app to confirm that a route is safe.</span></footer></body></html>
