@@ -190,3 +190,24 @@ body.high-contrast .panel-assembly-cursor .cursor-tag{background:#000;border:2px
 @media(max-width:520px){.settings-panel{top:74px;right:8px;width:calc(100vw - 16px);max-height:calc(100dvh - 82px);padding:14px}}
 /* Stage 6 tracking stability patch r2 */
 #gaze-cursor{width:14px;height:14px;border:1.5px solid #64e4e8;border-radius:50%;box-shadow:0 0 5px #64e4e8;transition:none}#gaze-cursor span{inset:4px;background:#64e4e8}#gaze-cursor.gaze-actionable{width:14px;height:14px;border-color:#64e4e8;box-shadow:0 0 5px #64e4e8}#gaze-cursor.gaze-actionable span{background:#64e4e8}
+
+/* SYNVORA intent navigation, emergency support and live scene camera */
+.journey-intelligence,.surface-vision-panel{margin:20px 0;padding:18px;border:1px solid rgba(75,218,235,.32);border-radius:16px;background:linear-gradient(145deg,rgba(10,35,55,.94),rgba(5,17,31,.96));box-shadow:0 0 28px rgba(62,207,232,.08)}
+.journey-intelligence h3,.surface-vision-panel h3{margin:6px 0 10px}
+.journey-form{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:9px;margin:14px 0}
+.journey-form input{min-width:0;padding:13px;border:1px solid #41657b;border-radius:10px;background:#061626;color:#f3fbff}
+.journey-result{display:grid;gap:7px;padding:13px;border:1px solid rgba(76,222,230,.2);border-radius:10px;background:#041321;color:#dff8ff;overflow-wrap:anywhere}
+.journey-result>span{font-size:.78rem;color:var(--muted)}
+.journey-result p{margin:4px 0;font-size:.78rem;color:var(--muted)}
+.journey-stats{display:flex;flex-wrap:wrap;gap:9px}.journey-stats b{padding:7px 10px;border:1px solid rgba(75,218,235,.3);border-radius:8px;color:#a6f2ed;font-size:.8rem}
+.journey-route-legend{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0;font-size:.76rem;color:var(--muted)}
+.journey-route-legend span{display:flex;align-items:center;gap:7px}.route-key{width:20px;height:4px;border-radius:5px;display:inline-block}.route-best{background:#43e5c2}.route-alt{background:#ffc857}
+.emergency-quick{display:grid;grid-template-columns:minmax(150px,.7fr) 1.3fr;gap:12px;margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+.emergency-quick p{margin:5px 0}.emergency-actions{display:flex;flex-wrap:wrap;gap:8px;align-content:start}.emergency-send{background:#103e36;border-color:#36c99c;color:#d8fff2}
+.emergency-contact-list{display:grid;gap:10px}.emergency-contact-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.emergency-contact-row label{display:grid;gap:6px;font-size:.8rem;color:var(--muted)}.emergency-contact-row input{min-width:0;width:100%;padding:10px;border-radius:9px;border:1px solid #41617a;background:#071827;color:white}
+.emergency-settings{border-top:1px solid var(--line);padding-top:15px;margin-top:15px}
+.surface-vision-viewer{position:relative;min-height:210px;max-height:480px;display:grid;place-items:center;overflow:hidden;border:1px solid rgba(80,180,230,.3);border-radius:13px;background:#030b14}
+.surface-vision-viewer video{display:block;width:100%;max-height:480px;object-fit:contain}.surface-vision-viewer canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#surface-vision-empty{padding:45px 10px;text-align:center;color:#91b6c8;letter-spacing:.12em;font-size:.8rem}
+.surface-vision-panel .detection-list{max-height:170px;overflow:auto}
+@media(max-width:620px){.journey-form{grid-template-columns:1fr 1fr}.journey-form input{grid-column:1/-1}.emergency-quick{grid-template-columns:1fr}.emergency-contact-row{grid-template-columns:1fr}}
