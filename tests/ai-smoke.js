@@ -1,6 +1,7 @@
 const fs=require("node:fs"),assert=require("node:assert/strict");
 const ai=fs.readFileSync("synvora-ai.js","utf8"),assembly=fs.readFileSync("panel-assembly.js","utf8"),html=fs.readFileSync("index.html","utf8");
 for(const token of ["openrouter.ai/api/v1/","chat/completions","Test configuration","Save configuration","localStorage.setItem(KEY","moduleContext","normalizeActions","Apply suggested actions","synvora:location","enableHighAccuracy:false","Browser/iOS denied location permission"])assert.ok(ai.includes(token),"Missing AI/location capability: "+token);
+assert.ok(ai.includes("synvora-ai-include-text")&&ai.includes("documentText")&&ai.includes("ocrText"),"Opt-in OCR/document context control is missing");
 for(const id of ["synvora-ai-key","synvora-ai-model","synvora-ai-test","synvora-ai-save","synvora-ai-clear","synvora-ai-form","synvora-ai-query","synvora-ai-apply"])assert.ok(ai.includes(id),"Missing AI settings UI: "+id);
 for(const id of ["synvora-core","echo","civiclens","journey-title","formgenius","terrain-ai","live-route","settings-panel"])assert.ok(ai.includes('"'+id+'"'),"Missing AI navigation target: "+id);
 for(const id of ["analyze","run-ocr","accessibility-scan","fg-analyze"])assert.ok(ai.includes('"'+id+'"'),"Missing safe AI action: "+id);
