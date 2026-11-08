@@ -5,7 +5,7 @@ const say=m=>{const e=$("journey-status");if(e)e.textContent=m};
 const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const MAP_WAIT_MS=15000;
 const overpass=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"];
-const routeHosts=["https://routing.openstreetmap.de/routed-foot/route/v1/driving/","https://routing.openstreetmap.de/routed-foot/route/v1/foot/"];
+const routeHosts=["https://routing.openstreetmap.de/routed-foot/route/v1/foot/"];
 function map(){return window.SYNVORA_CIVIC_MAP?.getMap?.()||null}
 async function waitForMap(){const start=Date.now();while(!map()&&Date.now()-start<MAP_WAIT_MS)await new Promise(r=>setTimeout(r,250));if(!map())throw Error("The OpenStreetMap is still loading. Wait a moment and try again.");return map()}
 function ensureRouteLayer(){const m=map();if(!m||!window.L)return null;if(!S.routeLayer)S.routeLayer=L.layerGroup().addTo(m);return S.routeLayer}
@@ -19,8 +19,8 @@ function facilityIntent(text){const q=text.toLowerCase();const defs=[
 {label:"drinking water",re:/\b(drinking water|water point|water refill|water fountain)\b/,filter:'["amenity"="drinking_water"]'},
 {label:"toilet",re:/\b(toilet|toilets|restroom|restrooms|washroom|washrooms)\b/,filter:'["amenity"="toilets"]'},
 {label:"bus stop",re:/\b(bus stop|bus station|bus stand)\b/,filter:'["highway"="bus_stop"]'},
-{label:"railway station",re:/\b(railway station|train station|rail station)\b/,filter:'["railway"="station"]'},
-{label:"metro station",re:/\b(metro station|subway station)\b/,filter:'["railway"="station"]["station"="subway"]'},
+{label:"railway station",re:/\b(railway|railways|railway station|train station|train|rail station)\b/,filter:'["railway"="station"]'},
+{label:"metro station",re:/\b(metro|metro station|subway station)\b/,filter:'["railway"="station"]["station"="subway"]'},
 {label:"shelter",re:/\b(shelter|shelters|homeless shelter)\b/,filter:'["amenity"="shelter"]'},
 {label:"bench",re:/\b(bench|benches|place to sit|resting place)\b/,filter:'["amenity"="bench"]'},
 {label:"pond",re:/\b(pond|ponds)\b/,filter:'["natural"="water"]["water"="pond"]'},
@@ -38,7 +38,7 @@ function facilityIntent(text){const q=text.toLowerCase();const defs=[
 ];return defs.find(d=>d.re.test(q))||null}
 function box(lat,lon,km=7){const d=km/111.32,dx=d/Math.max(.15,Math.cos(lat*Math.PI/180));return [lon-dx,lat-d,lon+dx,lat+d].join(",")}
 async function fetchNearby(intent,origin){
- const radius=9000,filter=intent.filter;
+ const radius=15000,filter=intent.filter;
  const q='[out:json][timeout:18];(node(around:'+radius+','+origin.lat+','+origin.lon+')'+filter+';way(around:'+radius+','+origin.lat+','+origin.lon+')'+filter+';relation(around:'+radius+','+origin.lat+','+origin.lon+')'+filter+';);out center tags;';
  const controllers=overpass.map(()=>new AbortController());
  const jobs=overpass.map((endpoint,i)=>(async()=>{
@@ -54,41 +54,70 @@ async function fetchNearby(intent,origin){
   }finally{clearTimeout(timer)}
  })());
  try{const found=await Promise.any(jobs);controllers.forEach(x=>x.abort());return found}catch(e){
-  const q2=encodeURIComponent(intent.label),url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=10&addressdetails=1&viewbox="+box(origin.lat,origin.lon,10)+"&bounded=1&q="+q2;
-  try{
+  const terms=[intent.label,intent.label==="clinic"?"doctors":intent.label==="railway station"?"train station":intent.label];let fallbackError;
+  for(const term of [...new Set(terms)])try{
+   const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=20&addressdetails=1&viewbox="+box(origin.lat,origin.lon,22)+"&bounded=1&q="+encodeURIComponent(term);
    const r=await fetch(url,{headers:{Accept:"application/json"},signal:AbortSignal.timeout(14000)});
    if(!r.ok)throw Error("Nearby place lookup returned "+r.status);
    const rows=await r.json();
-   const items=rows.map(x=>({lat:Number(x.lat),lon:Number(x.lon),name:x.name||x.display_name.split(",")[0],display:x.display_name,tags:{},straight:haversine(origin,{lat:Number(x.lat),lon:Number(x.lon)})})).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)&&x.straight<=12000).sort((a,b)=>a.straight-b.straight);
+   const items=rows.map(x=>({lat:Number(x.lat),lon:Number(x.lon),name:x.name||x.display_name.split(",")[0],display:x.display_name,tags:{},straight:haversine(origin,{lat:Number(x.lat),lon:Number(x.lon)})})).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)&&x.straight<=24000).sort((a,b)=>a.straight-b.straight);
    if(items.length)return items;
-  }catch(fallbackError){throw Error("Nearby "+intent.label+" search timed out on OpenStreetMap mirrors and the place-search fallback ("+fallbackError.message+"). Try again in a moment or enter a named landmark.")}
+  }catch(e){fallbackError=e}
+  if(fallbackError)throw Error("Nearby "+intent.label+" search could not reach OpenStreetMap place search ("+fallbackError.message+"). Try again when the connection is available.");
   return [];
  }
 }
-async function geocodeDestination(query,origin){const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&addressdetails=1&viewbox="+box(origin.lat,origin.lon)+"&bounded=1&q="+encodeURIComponent(query);const r=await fetch(url,{headers:{Accept:"application/json"},signal:AbortSignal.timeout(18000)});if(!r.ok)throw Error("Destination search service returned "+r.status);const rows=await r.json();return rows.map(x=>({lat:Number(x.lat),lon:Number(x.lon),name:x.name||x.display_name.split(",")[0],display:x.display_name,tags:{},straight:haversine(origin,{lat:Number(x.lat),lon:Number(x.lon)})})).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)).sort((a,b)=>a.straight-b.straight)}
+async function geocodeDestination(query,origin){const clean=String(query).replace(/\b(please|find|show me|where is|take me to|nearest|closest|nearby|near me)\b/gi," ").replace(/\s+/g," ").trim()||query;const params="format=jsonv2&limit=15&addressdetails=1&viewbox="+box(origin.lat,origin.lon,22)+"&bounded=1&q="+encodeURIComponent(clean);let rows=[];let last;for(const url of ["https://nominatim.openstreetmap.org/search?"+params,"https://nominatim.openstreetmap.org/search?format=jsonv2&limit=15&addressdetails=1&q="+encodeURIComponent(clean)])try{const r=await fetch(url,{headers:{Accept:"application/json"},signal:AbortSignal.timeout(16000)});if(!r.ok)throw Error("Destination search service returned "+r.status);rows=await r.json();if(rows.length)break}catch(e){last=e}if(!rows.length&&last)throw last;return rows.map(x=>({lat:Number(x.lat),lon:Number(x.lon),name:x.name||x.display_name.split(",")[0],display:x.display_name,tags:{},straight:haversine(origin,{lat:Number(x.lat),lon:Number(x.lon)})})).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)&&x.straight<=30000).sort((a,b)=>a.straight-b.straight)}
 async function snapToRoad(origin){
  let last;
  for(const host of routeHosts){
   const nearestHost=host.replace("/route/v1/","/nearest/v1/");
-  const url=nearestHost+origin.lon+","+origin.lat+"?number=1";
+  const url=nearestHost+origin.lon+","+origin.lat+"?number=3";
   try{
-   const r=await fetch(url,{signal:AbortSignal.timeout(14000)});
-   if(!r.ok)throw Error("Road-snap service returned "+r.status);
-   const data=await r.json(),wp=data.waypoints?.[0],loc=wp?.location;
-   if(data.code!=="Ok"||!Array.isArray(loc)||loc.length<2)throw Error("No nearby routable road was returned");
-   const road={lat:Number(loc[1]),lon:Number(loc[0])},distance=haversine(origin,road);
-   if(!Number.isFinite(road.lat)||!Number.isFinite(road.lon)||distance>1200)throw Error("The nearest mapped road is too far away to create a reliable access connection ("+fmtDistance(distance)+").");
-   return {...road,distance,name:wp.name||"Nearest mapped road"};
+   const r=await fetch(url,{signal:AbortSignal.timeout(12000)});
+   if(!r.ok)throw Error("Pedestrian road-snap service returned "+r.status);
+   const data=await r.json(),wp=(data.waypoints||[]).find(x=>Array.isArray(x.location)&&x.location.length>=2);
+   if(data.code!=="Ok"||!wp)throw Error(data.message||"No nearby pedestrian road segment was returned");
+   const road={lat:Number(wp.location[1]),lon:Number(wp.location[0])},distance=haversine(origin,road);
+   if(!Number.isFinite(road.lat)||!Number.isFinite(road.lon)||distance>1500)throw Error("Nearest pedestrian road is outside the 1.5 km access limit");
+   return {...road,distance,name:wp.name||"Nearest mapped pedestrian road",source:"routing-service"};
   }catch(e){last=e}
  }
- throw last||Error("Could not locate a nearby routable road");
+ // Independent fallback: find actual mapped pedestrian-accessible OSM highway geometry,
+ // then project the GPS point onto its nearest segment.
+ const q='[out:json][timeout:18];way(around:1800,'+origin.lat+','+origin.lon+')["highway"];out geom;';
+ const controllers=overpass.map(()=>new AbortController());
+ const jobs=overpass.map((endpoint,i)=>(async()=>{
+  const timer=setTimeout(()=>controllers[i].abort(),16000);
+  try{
+   const r=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8","Accept":"application/json"},body:"data="+encodeURIComponent(q),signal:controllers[i].signal});
+   if(!r.ok)throw Error("Road geometry lookup returned "+r.status);
+   const data=await r.json(),ways=Array.isArray(data.elements)?data.elements:[];
+   const rad=origin.lat*Math.PI/180,mx=111320*Math.cos(rad),my=111320;
+   let best=null;
+   for(const way of ways){
+    const tags=way.tags||{},h=tags.highway||"";
+    if(!Array.isArray(way.geometry)||way.geometry.length<2||/^(motorway|motorway_link|trunk|trunk_link|construction|proposed|raceway|abandoned|platform)$/i.test(h)||/^(no|private)$/i.test(tags.foot||tags.access||""))continue;
+    for(let k=1;k<way.geometry.length;k++){
+     const p=way.geometry[k-1],z=way.geometry[k],ax=(Number(p.lon)-origin.lon)*mx,ay=(Number(p.lat)-origin.lat)*my,bx=(Number(z.lon)-origin.lon)*mx,by=(Number(z.lat)-origin.lat)*my,dx=bx-ax,dy=by-ay,len=dx*dx+dy*dy;
+     if(!Number.isFinite(len)||len<0.01)continue;
+     const t=Math.max(0,Math.min(1,-(ax*dx+ay*dy)/len)),x=ax+t*dx,y=ay+t*dy,distance=Math.hypot(x,y);
+     if(!best||distance<best.distance)best={lat:origin.lat+y/my,lon:origin.lon+x/mx,distance,name:tags.name||h+" path",source:"openstreetmap-road-geometry"};
+    }
+   }
+   if(!best)throw Error("No mapped pedestrian-accessible road geometry was found nearby");
+   if(best.distance>1500)throw Error("Nearest mapped pedestrian-accessible road is "+fmtDistance(best.distance)+" away");
+   return best;
+  }finally{clearTimeout(timer)}
+ })());
+ try{const found=await Promise.any(jobs);controllers.forEach(x=>x.abort());return found}catch(e){throw Error("Could not identify a nearby pedestrian-accessible mapped road. "+(last?.message||"Routing service unavailable.")+" Map fallback: "+(e.errors?.map(x=>x.message).join("; ")||e.message))}
 }
 async function routeBetween(a,b){let last;for(const host of routeHosts){const coords=a.lon+","+a.lat+";"+b.lon+","+b.lat;const url=host+coords+"?overview=full&geometries=geojson&steps=true&alternatives=true";try{const r=await fetch(url,{signal:AbortSignal.timeout(25000)});if(!r.ok)throw Error("Pedestrian route service returned "+r.status);const data=await r.json();if(data.code!=="Ok"||!data.routes?.length)throw Error(data.message||"No connected pedestrian route");const routes=data.routes.filter(x=>x.geometry?.coordinates?.length>1&&Number.isFinite(x.distance)&&Number.isFinite(x.duration));if(routes.length)return routes.sort((x,y)=>x.duration-y.duration)}catch(e){last=e}}throw last||Error("No pedestrian route could be calculated")}
 function fmtDistance(m){return m>=1000?(m/1000).toFixed(1)+" km":Math.round(m)+" m"}
 function renderRoute(routes,dest,roadOrigin){const m=map(),layer=ensureRouteLayer();if(!m||!layer||!routes.length)throw Error("Map view is not ready. Tap Use my location first.");layer.clearLayers();const colors=["#43e5c2","#ffc857","#b59aff"];routes.slice(0,3).forEach((r,i)=>{const pts=r.geometry.coordinates.map(p=>[p[1],p[0]]);L.polyline(pts,{color:colors[i],weight:i===0?7:4,opacity:i===0?.98:.75,dashArray:i===0?null:"9 9"}).addTo(layer).bindPopup((i===0?"RECOMMENDED PEDESTRIAN ROUTE":"ALTERNATIVE "+i)+" · "+fmtDistance(r.distance)+" · "+Math.round(r.duration/60)+" min")});if(S.origin&&roadOrigin){L.polyline([[S.origin.lat,S.origin.lon],[roadOrigin.lat,roadOrigin.lon]],{color:"#42c9ff",weight:5,opacity:.95,dashArray:"3 9"}).addTo(layer).bindPopup("GPS-to-road access connector · "+fmtDistance(roadOrigin.distance)+" straight-line map connector only; check the actual ground path before walking");L.circleMarker([roadOrigin.lat,roadOrigin.lon],{radius:7,color:"#eafcff",weight:2,fillColor:"#42c9ff",fillOpacity:1}).addTo(layer).bindPopup("Route starts here: nearest mapped routable road")};L.marker([dest.lat,dest.lon]).addTo(layer).bindPopup("<strong>"+esc(dest.name)+"</strong><br>OpenStreetMap destination");if(S.origin)L.circleMarker([S.origin.lat,S.origin.lon],{radius:8,color:"#eafcff",weight:3,fillColor:"#35d9f2",fillOpacity:1}).addTo(layer).bindPopup("Your actual GPS starting location");const bounds=L.featureGroup(layer.getLayers()).getBounds();if(bounds.isValid())m.fitBounds(bounds.pad(.18))}
-function showResult(dest,routes){const best=routes[0],min=Math.max(1,Math.round(best.duration/60));$("journey-result").innerHTML="<strong>"+esc(dest.name)+"</strong><span>"+esc(dest.display||dest.name)+"</span><div class='journey-stats'><b>"+fmtDistance(best.distance)+"</b><b>~"+min+" min</b><b>"+routes.length+" route option(s)</b></div><p>Recommended route is the fastest route returned by the pedestrian-routing service. Mapped place data can be incomplete; route time and colour do not certify safety or accessibility.</p>";say("Route ready: "+dest.name+" · "+fmtDistance(best.distance)+" · about "+min+" min. Cyan = recommended; amber/purple = alternatives. Please verify surroundings and local conditions.")}
-async function askJourney(forcedQuery){if(S.busy)return;const input=$("journey-query"),q=String(forcedQuery||input.value).trim();if(forcedQuery)input.value=q;if(!q){say("Type a need such as nearest hospital, pharmacy, drinking water, toilet or a destination.");return}S.busy=true;$("journey-find").disabled=true;$("journey-result").textContent="Finding nearby places and calculating routes…";try{say("Getting your current GPS position…");const origin=await currentLocation();S.origin=origin;await waitForMap();setOrigin(origin.lat,origin.lon,origin.accuracy);const m=map();m.setView([origin.lat,origin.lon],16);setTimeout(()=>m.invalidateSize(),100);say("Finding the nearest routable road to your GPS position…");const roadOrigin=await snapToRoad(origin);const routeStart={lat:roadOrigin.lat,lon:roadOrigin.lon};const intent=facilityIntent(q);let candidates;if(intent){say("Searching OpenStreetMap for nearby "+intent.label+" locations…");candidates=await fetchNearby(intent,origin);if(!candidates.length)candidates=await fetchNearby(intent,routeStart);if(!candidates.length)throw Error("No "+intent.label+" locations were found near your GPS position or the nearest mapped road. Try a more specific place name.");}else{say("Searching for your destination near your GPS position…");candidates=await geocodeDestination(q,origin);if(!candidates.length)candidates=await geocodeDestination(q,routeStart);if(!candidates.length)throw Error("No matching destination was found near your GPS position or the nearest mapped road. Try adding a locality or landmark.");}
-candidates=candidates.filter(c=>c.straight<=12000).slice(0,6);if(!candidates.length)throw Error("No matching destination found within 12 km. Try a closer or more specific search.");let best=null,routeErrors=[];say("Found "+candidates.length+" candidate place(s). Comparing pedestrian routes…");for(const candidate of candidates.slice(0,4)){try{const routes=await routeBetween(routeStart,candidate);if(!best||routes[0].duration<best.routes[0].duration)best={dest:candidate,routes}}catch(e){routeErrors.push(e.message)}}if(!best)throw Error("Found nearby places, but the pedestrian-routing service could not connect to them. Check your internet and retry; do not assume a straight-line route is walkable.");renderRoute(best.routes,best.dest,roadOrigin);showResult(best.dest,best.routes);say("Route ready. Dashed cyan = GPS-to-nearest-road access connector ("+fmtDistance(roadOrigin.distance)+"); solid cyan = recommended pedestrian route. The dashed connector is a straight map link, not proof of a clear walking path—check for gates, walls, private property and traffic before proceeding.")}catch(e){say("Journey search: "+e.message);$("journey-result").textContent="Could not create a reliable route. "+e.message}finally{S.busy=false;$("journey-find").disabled=false}}
+function showResult(dest,routes){const best=routes[0],min=Math.max(1,Math.round(best.duration/60));$("journey-result").innerHTML="<strong>"+esc(dest.name)+"</strong><span>"+esc(dest.display||dest.name)+"</span><div class='journey-stats'><b>"+fmtDistance(best.distance)+"</b><b>~"+min+" min</b><b>"+routes.length+" route option(s)</b></div><p>Recommended route is the fastest pedestrian route returned by the foot-routing service. Mapped place data can be incomplete; route time and colour do not certify safety or accessibility.</p>";say("Route ready: "+dest.name+" · "+fmtDistance(best.distance)+" · about "+min+" min. Cyan = recommended; amber/purple = alternatives. Please verify surroundings and local conditions.")}
+async function askJourney(forcedQuery){if(S.busy)return;const input=$("journey-query"),q=String(forcedQuery||input.value).trim();if(forcedQuery)input.value=q;if(!q){say("Type a need such as nearest hospital, pharmacy, drinking water, toilet or a destination.");return}S.busy=true;$("journey-find").disabled=true;$("journey-result").textContent="Finding nearby places and calculating routes…";try{say("Getting your current GPS position…");const origin=await currentLocation();S.origin=origin;await waitForMap();setOrigin(origin.lat,origin.lon,origin.accuracy);const m=map();m.setView([origin.lat,origin.lon],16);setTimeout(()=>m.invalidateSize(),100);say("Finding the nearest routable road to your GPS position…");const roadOrigin=await snapToRoad(origin);const routeStart={lat:roadOrigin.lat,lon:roadOrigin.lon};const intent=facilityIntent(q)||facilityIntent(q.replace(/\b(please|find|show me|where is|take me to|nearest|closest|nearby|near me)\b/gi," "));let candidates;if(intent){say("Searching for nearby "+intent.label+" places around your GPS point and nearest mapped road…");const [atGps,atRoad]=await Promise.all([fetchNearby(intent,origin).catch(()=>[]),fetchNearby(intent,routeStart).catch(()=>[])]);const seen=new Set();candidates=[...atGps,...atRoad].filter(x=>{const key=x.lat.toFixed(5)+","+x.lon.toFixed(5);if(seen.has(key))return false;seen.add(key);return true}).sort((x,y)=>x.straight-y.straight);if(!candidates.length)throw Error("No mapped "+intent.label+" destination was found within 15 km of your GPS position or nearest mapped road. Try a more specific place name or check OpenStreetMap coverage.");}else{say("Searching for your destination around your GPS point and nearest mapped road…");const clean=q.replace(/\b(please|find|show me|where is|take me to|nearest|closest|nearby|near me)\b/gi," ").replace(/\s+/g," ").trim()||q;const [atGps,atRoad]=await Promise.all([geocodeDestination(clean,origin).catch(()=>[]),geocodeDestination(clean,routeStart).catch(()=>[])]);const seen=new Set();candidates=[...atGps,...atRoad].filter(x=>{const key=x.lat.toFixed(5)+","+x.lon.toFixed(5);if(seen.has(key))return false;seen.add(key);return true}).sort((x,y)=>x.straight-y.straight);if(!candidates.length)throw Error("No matching destination was found within 30 km of your GPS position or nearest mapped road. Try a specific place name or locality.");}
+candidates=candidates.filter(c=>c.straight<=30000).slice(0,12);if(!candidates.length)throw Error("No matching destination found within 12 km. Try a closer or more specific search.");let best=null,routeErrors=[];say("Found "+candidates.length+" candidate place(s). Comparing pedestrian routes…");for(const candidate of candidates.slice(0,8)){try{const routes=await routeBetween(routeStart,candidate);if(!best||routes[0].duration<best.routes[0].duration)best={dest:candidate,routes}}catch(e){routeErrors.push(e.message)}}if(!best)throw Error("Found nearby places, but the pedestrian-routing service could not connect to them. Check your internet and retry; do not assume a straight-line route is walkable.");renderRoute(best.routes,best.dest,roadOrigin);showResult(best.dest,best.routes);say("Route ready. Dashed cyan = GPS-to-nearest-road access connector ("+fmtDistance(roadOrigin.distance)+"); solid cyan = recommended pedestrian route. The dashed connector is a straight map link, not proof of a clear walking path—check for gates, walls, private property and traffic before proceeding.")}catch(e){say("Journey search: "+e.message);$("journey-result").textContent="Could not create a reliable route. "+e.message}finally{S.busy=false;$("journey-find").disabled=false}}
 function speakQuery(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){say("Voice input is not supported here. Type your request instead.");return}const r=new SR();r.lang=$("language")?.value||"en-US";r.maxAlternatives=1;r.onresult=e=>{$("journey-query").value=e.results[0][0].transcript;askJourney()};r.onerror=()=>say("Voice recognition did not complete. Please type your request.");try{r.start();say("Listening…")}catch{say("Voice input could not start. Type your request instead.")}}
 function normalizePhone(v){return String(v||"").replace(/[^0-9]/g,"")}
 function readContacts(){try{const v=JSON.parse(localStorage.getItem(KEY)||"[]");S.contacts=Array.isArray(v)?v.slice(0,3):[]}catch{S.contacts=[]}renderContacts()}
