@@ -16,6 +16,7 @@ assert.ok(journey.includes("Promise.any(jobs)")&&journey.includes("pedestrian-ac
 assert.ok(journey.includes("const routeHosts=[\"https://routing.openstreetmap.de/routed-foot/route/v1/foot/\"")&&!journey.includes("/route/v1/driving/"),"Walking navigation must not silently fall back to driving routes");
 assert.ok(journey.includes("nearest|closest|nearby|near me")&&journey.includes("30 km")&&journey.includes("slice(0,8)"),"Nearest search must normalize command words, expand fallback search and compare more candidates");
 assert.ok(journey.includes("routeBetween(routeStart,candidate)")&&journey.includes("fetchNearby(intent,routeStart)")&&journey.includes("geocodeDestination(q,routeStart)"),"Destination search and routing must fall back to the nearest road origin");
+assert.ok(journey.includes("routes[0].distance<best.routes[0].distance")&&journey.includes("shortest-distance pedestrian route"),"Nearest destination selection must prefer the shortest pedestrian distance");
 assert.ok(journey.includes("GPS-to-road access connector")&&journey.includes('dashArray:"3 9"')&&journey.includes("actual ground path before walking"),"Map must distinguish the dashed GPS-to-road access connector from the pedestrian route");
 assert.ok(journey.includes('synvora:journey-search')&&civic.includes("synvora:journey-search"),"CIVICLENS search does not forward nearby intents to Intent Navigation");
 assert.ok(!civic.includes("Map data unavailable from the primary and backup OpenStreetMap services"),"Old fatal OpenStreetMap outage message remains");
