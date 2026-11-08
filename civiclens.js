@@ -21,28 +21,30 @@ function renderReports(){if(!state.reportLayer)return;state.reportLayer.clearLay
 function persistReports(){state.reports=state.reports.slice(0,60);const save=()=>localStorage.setItem(STORAGE,JSON.stringify(state.reports));try{save()}catch(e){state.reports.forEach((r,i)=>{if(i>4)r.imageData=null});try{save()}catch(e2){state.reports.forEach(r=>r.imageData=null);state.reports=state.reports.slice(0,35);try{save()}catch(e3){status("Device storage is full. Export and remove older browser data before saving more reports.",true);return}}}window.dispatchEvent(new Event("civiclens:reports-updated"))}
 function parseElements(data){const seen=new Set();return (data.elements||[]).map(el=>{const p=coords(el);if(!p)return null;const key=el.type+":"+el.id;if(seen.has(key))return null;seen.add(key);return {id:key,position:p,tags:el.tags||{},category:categoryFor(el.tags||{})}}).filter(Boolean)}
 async function loadNearby(lat,lon){
- await initMap();if(!state.map)return;state.center={lat,lon};state.map.setView([lat,lon],18);status("GPS position acquired. Loading nearby OpenStreetMap data…");
+ await initMap();if(!state.map)return;state.center={lat,lon};state.map.setView([lat,lon],18);status("GPS position acquired. Querying OpenStreetMap accessibility data mirrors in parallel…");
  const radius=Number($("civic-radius").value)||800;
- const q='[out:json][timeout:15];(nwr(around:'+radius+','+lat+','+lon+')["wheelchair"];nwr(around:'+radius+','+lat+','+lon+')["tactile_paving"];nwr(around:'+radius+','+lat+','+lon+')["ramp"];nwr(around:'+radius+','+lat+','+lon+')["kerb"];nwr(around:'+radius+','+lat+','+lon+')["highway"="crossing"];nwr(around:'+radius+','+lat+','+lon+')["amenity"~"toilets|bench|parking"];nwr(around:'+radius+','+lat+','+lon+')["highway"="elevator"];nwr(around:'+radius+','+lat+','+lon+')["elevator"="yes"];);out center tags;';
- const cacheKey=CACHE+":"+lat.toFixed(3)+":"+lon.toFixed(3)+":"+radius;let lastError=null;
- for(const endpoint of endpoints){
+ const q='[out:json][timeout:18];(nwr(around:'+radius+','+lat+','+lon+')["wheelchair"];nwr(around:'+radius+','+lat+','+lon+')["tactile_paving"];nwr(around:'+radius+','+lat+','+lon+')["ramp"];nwr(around:'+radius+','+lat+','+lon+')["kerb"];nwr(around:'+radius+','+lat+','+lon+')["highway"="crossing"];nwr(around:'+radius+','+lat+','+lon+')["amenity"~"toilets|bench|parking"];nwr(around:'+radius+','+lat+','+lon+')["highway"="elevator"];nwr(around:'+radius+','+lat+','+lon+')["elevator"="yes"];);out center tags;';
+ const cacheKey=CACHE+":"+lat.toFixed(3)+":"+lon.toFixed(3)+":"+radius,controllers=endpoints.map(()=>new AbortController());
+ const jobs=endpoints.map((endpoint,i)=>(async()=>{
+  const timer=setTimeout(()=>controllers[i].abort(),19000);
   try{
-   const res=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:"data="+encodeURIComponent(q),signal:AbortSignal.timeout(10000)});
-   if(!res.ok)throw new Error("OpenStreetMap query service returned "+res.status);
-   const data=await res.json();if(!Array.isArray(data.elements))throw new Error("OpenStreetMap returned an unexpected response.");
-   state.items=parseElements(data);renderItems();
-   try{const prefix=CACHE+":";const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(prefix)&&k!==cacheKey)keys.push(k)}while(keys.length>5)localStorage.removeItem(keys.shift());localStorage.setItem(cacheKey,JSON.stringify({savedAt:new Date().toISOString(),items:state.items}))}catch(e){try{for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.startsWith(CACHE+":"))localStorage.removeItem(k)}localStorage.setItem(cacheKey,JSON.stringify({savedAt:new Date().toISOString(),items:state.items}))}catch{}}
-   status("Loaded "+state.items.length+" mapped records from OpenStreetMap. Community data may be incomplete or outdated.");return;
-  }catch(e){lastError=e}
- }
+   const res=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8","Accept":"application/json"},body:"data="+encodeURIComponent(q),signal:controllers[i].signal});
+   if(!res.ok)throw Error("Mirror returned HTTP "+res.status);
+   const data=await res.json();if(!Array.isArray(data.elements))throw Error("Mirror returned an invalid OpenStreetMap response");
+   const items=parseElements(data);if(!items.length)throw Error("Mirror returned no tagged accessibility features");
+   return {items,endpoint};
+  }finally{clearTimeout(timer)}
+ })());
  try{
-  const cached=JSON.parse(localStorage.getItem(cacheKey)||"null");
-  if(cached&&Array.isArray(cached.items)){
-   state.items=cached.items;renderItems();
-   status("Live map services are unavailable. Showing a saved OpenStreetMap snapshot from "+new Date(cached.savedAt).toLocaleString()+". This data may be stale; try refresh later.",true);return;
-  }
- }catch{}
- state.items=[];renderItems();status("Live accessibility overlays are temporarily unavailable from OpenStreetMap mirrors. The base map and place search remain available; use Intent Navigation below for nearby clinics, hospitals, stations, parks, water features and other destinations. "+(lastError?.message||"Network timeout."),true);
+  const winner=await Promise.any(jobs);controllers.forEach(x=>x.abort());state.items=winner.items;renderItems();
+  try{const prefix=CACHE+":";const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(prefix)&&k!==cacheKey)keys.push(k)}while(keys.length>5)localStorage.removeItem(keys.shift());localStorage.setItem(cacheKey,JSON.stringify({savedAt:new Date().toISOString(),items:state.items}))}catch{}
+  status("Loaded "+state.items.length+" mapped accessibility features. Source: a responsive OpenStreetMap mirror. Community tags may be incomplete or outdated.");return;
+ }catch(err){controllers.forEach(x=>x.abort());}
+ // Reuse a recent nearby snapshot even when GPS precision changes slightly between visits.
+ let cachedBest=null;
+ try{const prefix=CACHE+":";for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(!key||!key.startsWith(prefix))continue;try{const item=JSON.parse(localStorage.getItem(key)||"null");if(!item||!Array.isArray(item.items)||!item.savedAt)continue;const age=Date.now()-Date.parse(item.savedAt);if(age>7*86400000)continue;const parts=key.slice(prefix.length).split(":");const clat=Number(parts[0]),clon=Number(parts[1]),cradius=Number(parts[2]);if(!Number.isFinite(clat)||!Number.isFinite(clon)||cradius!==radius)continue;const distance=Math.hypot((clat-lat)*111320,(clon-lon)*111320*Math.cos(lat*Math.PI/180));if(distance>1800)continue;if(!cachedBest||distance<cachedBest.distance)cachedBest={...item,distance}}catch{}}}catch{}
+ if(cachedBest){state.items=cachedBest.items;renderItems();status("Live OpenStreetMap mirrors are not responding. Showing a saved accessibility snapshot from "+new Date(cachedBest.savedAt).toLocaleString()+" ("+Math.round(cachedBest.distance)+" m from this GPS point). This may be stale; refresh later.",true);return}
+ state.items=[];renderItems();status("Live accessibility data could not be fetched from the available OpenStreetMap mirrors. Your base map and Intent Navigation still work; mapped accessibility tags may be missing in this area. Check your connection and refresh. No live overlay is being shown as if it were current.",true);
 }
 function locate(){if(!navigator.geolocation){status("This browser does not provide location access.",true);return}status("Waiting for location permission…");navigator.geolocation.getCurrentPosition(p=>{const lat=p.coords.latitude,lon=p.coords.longitude;$("civic-report-location").textContent="Current location available: "+lat.toFixed(5)+", "+lon.toFixed(5);state.reportPoint={lat,lon};loadNearby(lat,lon).then(()=>window.dispatchEvent(new CustomEvent("synvora:location",{detail:{lat,lon,accuracy:p.coords.accuracy}})))},e=>status("Location unavailable: "+e.message,true),{enableHighAccuracy:true,timeout:15000,maximumAge:60000})}
 async function searchPlace(){const q=$("civic-search").value.trim();if(!q){status("Enter a place name first.",true);return}if(/\b(nearest|nearby|clinic|hospital|doctor|pharmacy|railway|rail|train station|bus stop|metro|pond|lake|river|stream|canal|school|college|university|atm|bank|police|fire station|park|garden|restaurant|cafe|supermarket|grocery|hotel|toilet|restroom|shelter|drinking water|post office)\b/i.test(q)){const journey=document.getElementById("journey-query");if(journey)journey.value=q;document.getElementById("journey-title")?.scrollIntoView({behavior:"smooth",block:"center"});window.dispatchEvent(new CustomEvent("synvora:journey-search",{detail:{query:q}}));status("Sent your nearby-service search to SYNVORA Intent Navigation. Allow GPS when prompted to find the nearest mapped results.");return}status("Searching for place…");try{const u="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q="+encodeURIComponent(q);const r=await fetch(u,{headers:{Accept:"application/json"},signal:AbortSignal.timeout(15000)});if(!r.ok)throw new Error("Place search returned "+r.status);const rows=await r.json();if(!rows.length)throw new Error("No matching place found");await loadNearby(Number(rows[0].lat),Number(rows[0].lon))}catch(e){status("Place search unavailable: "+e.message,true)}}
