@@ -12,7 +12,7 @@ for(const word of ["pond","lake","river","school","bank","police station","fire 
 assert.ok(journey.includes("Promise.any")&&journey.includes("nominatim.openstreetmap.org")&&journey.includes("setTimeout(()=>controllers[i].abort(),16000)"),"Nearby search resilience fallback missing");
 assert.ok(journey.includes("async function snapToRoad(origin)")&&journey.includes("/nearest/v1/")&&journey.includes("distance>1500"),"Off-road GPS must snap to a nearby routable road with a bounded connector");
 assert.ok(journey.includes('way(around:1800,')&&journey.includes('["highway"]')&&journey.includes("openstreetmap-road-geometry"),"Road snapping must fall back to real OpenStreetMap highway geometry");
-assert.ok(journey.includes("Promise.any(jobs)")&&journey.includes("pedestrian-accessible mapped road geometry"),"Independent Overpass road-geometry fallback is missing");
+assert.ok(journey.includes("Promise.any(jobs)")&&journey.includes("pedestrian-accessible road geometry"),"Independent Overpass road-geometry fallback is missing");
 assert.ok(journey.includes("const routeHosts=[\"https://routing.openstreetmap.de/routed-foot/route/v1/foot/\"")&&!journey.includes("/route/v1/driving/"),"Walking navigation must not silently fall back to driving routes");
 assert.ok(journey.includes("nearest|closest|nearby|near me")&&journey.includes("30 km")&&journey.includes("slice(0,8)"),"Nearest search must normalize command words, expand fallback search and compare more candidates");
 assert.ok(journey.includes("routeBetween(routeStart,candidate)")&&journey.includes("fetchNearby(intent,routeStart)")&&journey.includes("geocodeDestination(q,routeStart)"),"Destination search and routing must fall back to the nearest road origin");
