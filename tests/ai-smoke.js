@@ -20,6 +20,11 @@ assert.ok(journey.includes("routes[0].distance<best.routes[0].distance")&&journe
 assert.ok(journey.includes("GPS-to-road access connector")&&journey.includes('dashArray:"3 9"')&&journey.includes("actual ground path before walking"),"Map must distinguish the dashed GPS-to-road access connector from the pedestrian route");
 assert.ok(journey.includes('synvora:journey-search')&&civic.includes("synvora:journey-search"),"CIVICLENS search does not forward nearby intents to Intent Navigation");
 assert.ok(!civic.includes("Map data unavailable from the primary and backup OpenStreetMap services"),"Old fatal OpenStreetMap outage message remains");
+const journeyHandler=journey.slice(journey.indexOf("async function askJourney(forcedQuery){"),journey.indexOf("function speakQuery()"));
+assert.ok(journeyHandler.includes("fetchNearby(intent,origin)")&&journeyHandler.includes("geocodeDestination(clean,origin)"),"Nearby place search must use the user's GPS position");
+assert.ok(!journeyHandler.includes("snapToRoad(")&&!journeyHandler.includes("routeBetween(")&&!journeyHandler.includes("renderRoute("),"Unreliable in-app route calculation must remain disabled");
+assert.ok(journeyHandler.includes("straight-line distance")&&journeyHandler.includes("No walking route is being claimed"),"Nearby results must clearly disclose that they are not walking directions");
+assert.ok(html.includes("Find places")&&html.includes("in-app walking routes are disabled")&&!html.includes("Recommended walking route"),"Navigation UI must not promise unavailable walking routes");
 assert.ok(journey.includes("async function routeBetween(a,b)")&&journey.includes("routing.openstreetmap.de")&&journey.includes("valhalla1.openstreetmap.de/route")&&journey.includes('costing:"pedestrian"')&&journey.includes("decodePolyline6"),"Independent Valhalla pedestrian routing fallback is missing");
 assert.ok(civic.includes("Promise.any(jobs)")&&civic.includes("Querying OpenStreetMap accessibility data mirrors in parallel")&&civic.includes("saved accessibility snapshot")&&civic.includes("7*86400000"),"CIVICLENS must query mirrors in parallel and reuse only recent nearby cached overlays");
 console.log("SYNVORA AI, category search, pedestrian routing and accessibility overlay fallback smoke checks passed.");
