@@ -143,12 +143,12 @@ function updateBlink(now,closed){
  if(closed&&$("gaze-blink").checked){
   if(!S.closedAt){S.closedAt=now;S.blinkConsumed=false}
   if(now-S.closedAt>=70&&!S.blinkConsumed){
-   blinkClick();S.blinkConsumed=true;cursor.classList.add("gaze-actionable");
+   if(blinkClick()){cursor.classList.add("gaze-actionable");setTimeout(()=>cursor.classList.remove("gaze-actionable"),220)}S.blinkConsumed=true;
   }
  }else if(S.closedAt){
   const duration=now-S.closedAt;
   if($("gaze-blink").checked&&!S.blinkConsumed&&duration>=45&&duration<=1100){
-   blinkClick();cursor.classList.add("gaze-actionable");
+   if(blinkClick()){cursor.classList.add("gaze-actionable");setTimeout(()=>cursor.classList.remove("gaze-actionable"),220)}
   }
   S.closedAt=0;S.blinkConsumed=false;
  }
