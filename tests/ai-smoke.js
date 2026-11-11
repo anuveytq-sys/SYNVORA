@@ -18,7 +18,7 @@ assert.ok(civic.includes("Promise.any(jobs)")&&civic.includes("Querying OpenStre
 assert.ok(html.includes("Find places")&&html.includes("in-app walking routes are disabled")&&!html.includes("Recommended walking route"),"Navigation UI must not promise unavailable walking routes");
 
 const gaze=fs.readFileSync("gaze-control.js","utf8");
-for(const token of ["eyeRatio=(iris,outer,inner,upper,lower)","await new Promise(resolve=>setTimeout(resolve,45))","heads.length<5","now-S.lastDwell<120","direction*34","duration>=85&&duration<=620","now-S.lastClick>=650"])assert.ok(gaze.includes(token),"Missing tracking reliability fix: "+token);
+for(const token of ["eyeRatio=(iris,outer,inner,upper,lower)","await new Promise(resolve=>setTimeout(resolve,45))","heads.length<5","now-S.lastDwell<70","direction*step","duration>=85&&duration<=620","now-S.lastClick>=650"])assert.ok(gaze.includes(token),"Missing tracking reliability fix: "+token);
 assert.ok(ai.includes("new AbortController()")&&ai.includes("function responseText(data)"),"OpenRouter timeout and content-format handling missing");
 
 console.log("SYNVORA tracking, OpenRouter, AI, category search and accessibility smoke checks passed.");
