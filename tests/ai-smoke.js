@@ -16,4 +16,9 @@ assert.ok(!journeyHandler.includes("snapToRoad(")&&!journeyHandler.includes("rou
 assert.ok(journeyHandler.includes("straight-line distance")&&journeyHandler.includes("No walking route is being claimed"),"Nearby results must clearly disclose that they are not walking directions");
 assert.ok(civic.includes("Promise.any(jobs)")&&civic.includes("Querying OpenStreetMap accessibility data mirrors in parallel")&&civic.includes("saved accessibility snapshot")&&civic.includes("7*86400000"),"CIVICLENS must query mirrors in parallel and reuse only recent nearby cached overlays");
 assert.ok(html.includes("Find places")&&html.includes("in-app walking routes are disabled")&&!html.includes("Recommended walking route"),"Navigation UI must not promise unavailable walking routes");
-console.log("SYNVORA AI, category search, pedestrian routing and accessibility overlay fallback smoke checks passed.");
+
+const gaze=fs.readFileSync("gaze-control.js","utf8");
+for(const token of ["eyeRatio=(iris,outer,inner,upper,lower)","await new Promise(resolve=>setTimeout(resolve,45))","heads.length<5","now-S.lastDwell<120","direction*34","duration>=85&&duration<=620","now-S.lastClick>=650"])assert.ok(gaze.includes(token),"Missing tracking reliability fix: "+token);
+assert.ok(ai.includes("new AbortController()")&&ai.includes("function responseText(data)"),"OpenRouter timeout and content-format handling missing");
+
+console.log("SYNVORA tracking, OpenRouter, AI, category search and accessibility smoke checks passed.");
