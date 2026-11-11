@@ -13,7 +13,7 @@ assert.ok(manager.includes("activate")&&manager.includes("register")&&manager.in
 const gaze=fs.readFileSync("gaze-control.js","utf8");
 for(const f of ["FaceLandmarker","detectForVideo","getUserMedia","gaze-blink","gaze-dwell","gaze-edge","SYNVORA_CIVIC_MAP","panBy","scrollBy","pagehide","headBaseline","eyeBaseline","headSmooth","eyeSmooth","faceBlendshapes","eyeBlinkLeft","eyeBlinkRight","outputFaceBlendshapes:true","closedAt","stillSince","control.click()","duration>=85&&duration<=620","nose.x","eyeRatio(468","eyeRatio(473,","3.2","7.0","8.0","420"])assert.ok(gaze.includes(f),"Missing COSMOSIM-style tracking capability: "+f);
 assert.ok(html.includes("gaze-control.js")&&html.includes("stage6-gaze-cosmosim-r2"),"COSMOSIM-style head and eye tracking script is not cache-busted");
-assert.ok(gaze.includes("heads.length<5")&&gaze.includes("now-S.lastDwell<70")&&gaze.includes("direction*34"),"Stable multi-frame calibration and responsive dwell scrolling are required");
+assert.ok(gaze.includes("heads.length<5")&&gaze.includes("now-S.lastDwell<70")&&gaze.includes("direction*step"),"Stable multi-frame calibration and responsive dwell scrolling are required");
 assert.ok(!html.includes('id="gaze-dwell" checked')&&!html.includes('id="gaze-edge" checked')&&!html.includes('id="gaze-map" checked'),"Automatic scrolling must default OFF");
 assert.ok(css.includes("#gaze-cursor{width:14px"),"Cursor size should remain compact");
 assert.ok(gaze.includes("now-S.lastDwell<70")&&gaze.includes("innerHeight*.14")&&gaze.includes("direction*step"),"Responsive faster dwell scrolling is missing");
