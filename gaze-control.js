@@ -19,20 +19,20 @@ function blendshape(categories,name){
  return item?.score??0;
 }
 function readFace(landmarks,result){
- const nose=landmarks?.[1];
- if(!nose)return null;
- const leftIris=landmarks[468],rightIris=landmarks[473];
- const eye=leftIris&&rightIris
-  ?{x:(leftIris.x+rightIris.x)/2,y:(leftIris.y+rightIris.y)/2}
-  :null;
- const categories=result?.faceBlendshapes?.[0]?.categories||[];
- const left=blendshape(categories,"eyeBlinkLeft");
- const right=blendshape(categories,"eyeBlinkRight");
- return{
-  head:{x:nose.x,y:nose.y},
-  eye,
-  bothClosed:(left+right)/2>.38&&Math.min(left,right)>.18
+ const nose=landmarks?.[1];if(!nose)return null;
+ // Normalise iris position inside each eye to reduce drift from head movement.
+ const eyeRatio=(iris,outer,inner,upper,lower)=>{
+  if(!landmarks[iris]||!landmarks[outer]||!landmarks[inner]||!landmarks[upper]||!landmarks[lower])return null;
+  const a=landmarks[outer],b=landmarks[inner],p=landmarks[iris],u=landmarks[upper],l=landmarks[lower];
+  const left=Math.min(a.x,b.x),right=Math.max(a.x,b.x),top=Math.min(u.y,l.y),bottom=Math.max(u.y,l.y);
+  if(right-left<.008||bottom-top<.004)return null;
+  return{x:clamp((p.x-left)/(right-left),0,1),y:clamp((p.y-top)/(bottom-top),0,1)};
  };
+ const eyes=[eyeRatio(468,33,133,159,145),eyeRatio(473,362,263,386,374)].filter(Boolean);
+ const eye=eyes.length?{x:eyes.reduce((s,p)=>s+p.x,0)/eyes.length,y:eyes.reduce((s,p)=>s+p.y,0)/eyes.length}:null;
+ const categories=result?.faceBlendshapes?.[0]?.categories||[];
+ const left=blendshape(categories,"eyeBlinkLeft"),right=blendshape(categories,"eyeBlinkRight");
+ return{head:{x:nose.x,y:nose.y},eye,bothClosed:left>.42&&right>.42&&Math.min(left,right)>.22};
 }
 function draw(){
  cursor.style.transform="translate3d("+S.x+"px,"+S.y+"px,0) translate(-50%,-50%)";
@@ -126,29 +126,31 @@ function dwellScroll(now,dx,dy){
  if(!$("gaze-dwell").checked){S.stillSince=0;return}
  if(Math.hypot(dx,dy)>2.2){S.stillSince=0;return}
  if(!S.stillSince){S.stillSince=now;return}
- if(now-S.stillSince<Number($("gaze-dwell-time").value)||now-S.lastDwell<900)return;
+ const delay=Number($("gaze-dwell-time").value)||700;
+ if(now-S.stillSince<delay||now-S.lastDwell<120)return;
  const box=scrollableAtPointer();
  if(box){
-  const rect=box.getBoundingClientRect();
-  const edge=Math.min(58,Math.max(28,rect.height*.16));
+  const rect=box.getBoundingClientRect(),edge=Math.min(76,Math.max(34,rect.height*.2));
   let direction=0;
   if(S.y<=rect.top+edge&&box.scrollTop>0)direction=-1;
   else if(S.y>=rect.bottom-edge&&box.scrollTop+box.clientHeight<box.scrollHeight-1)direction=1;
-  if(direction)box.scrollBy({top:direction*110,behavior:"smooth"});
-  else box.scrollBy({top:110,behavior:"smooth"});
-  S.lastDwell=now;S.stillSince=now;
- }else S.stillSince=now;
+  if(!direction){S.stillSince=now;return}
+  box.scrollTop=clamp(box.scrollTop+direction*34,0,box.scrollHeight-box.clientHeight);
+  S.lastDwell=now;
+ }else{
+  const edge=54,direction=S.y<edge?-1:S.y>innerHeight-edge?1:0;
+  if(!direction){S.stillSince=now;return}
+  window.scrollBy({top:direction*30,behavior:"auto"});S.lastDwell=now;
+ }
 }
 function updateBlink(now,closed){
- if(closed&&$("gaze-blink").checked){
-  if(!S.closedAt){S.closedAt=now;S.blinkConsumed=false}
-  if(now-S.closedAt>=70&&!S.blinkConsumed){
-   if(blinkClick()){cursor.classList.add("gaze-actionable");setTimeout(()=>cursor.classList.remove("gaze-actionable"),220)}S.blinkConsumed=true;
-  }
- }else if(S.closedAt){
+ if(closed&&$("gaze-blink").checked){if(!S.closedAt){S.closedAt=now;S.blinkConsumed=false}return}
+ if(S.closedAt){
   const duration=now-S.closedAt;
-  if($("gaze-blink").checked&&!S.blinkConsumed&&duration>=45&&duration<=1100){
+  // Activate on release, not while the eyes remain closed.
+  if($("gaze-blink").checked&&!S.blinkConsumed&&duration>=85&&duration<=620&&now-S.lastClick>=650){
    if(blinkClick()){cursor.classList.add("gaze-actionable");setTimeout(()=>cursor.classList.remove("gaze-actionable"),220)}
+   S.blinkConsumed=true;
   }
   S.closedAt=0;S.blinkConsumed=false;
  }
@@ -218,10 +220,10 @@ async function start(){
    video:{facingMode:"user",width:{ideal:640},height:{ideal:480},frameRate:{ideal:24,max:30}}
   });
   video.srcObject=S.stream;await video.play();
-  status("Loading COSMOSIM-style face and iris tracking…");
+  status("Loading face and iris tracking model…");
   S.landmarker=await loadLandmarker();
   S.headBaseline=S.headSmooth=S.eyeBaseline=S.eyeSmooth=null;
-  S.closedAt=0;S.blinkConsumed=false;S.faceLost=0;S.stillSince=0;S.lastDetect=0;
+  S.closedAt=0;S.blinkConsumed=false;S.lastClick=0;S.faceLost=0;S.stillSince=0;S.lastDwell=0;S.lastDetect=0;
   S.active=true;
   $("gaze-start").disabled=true;$("gaze-stop").disabled=false;
   $("gaze-calibrate").disabled=false;$("gaze-recenter").disabled=false;
@@ -246,21 +248,27 @@ async function stop(showMessage=true){
  S.lastX=S.lastY=null;S.closedAt=0;S.blinkConsumed=false;S.stillSince=0;S.faceLost=0;
  if(showMessage)status("Tracking stopped. Camera released.");
 }
-function calibrate(){
+async function calibrate(){
  if(!S.landmarker||video.readyState<2)return;
+ const button=$("gaze-calibrate");button.disabled=true;status("Calibrating centre… keep your face still and look at the screen centre.");
  try{
-  const result=S.landmarker.detectForVideo(video,performance.now());
-  const landmarks=result.faceLandmarks?.[0];
-  if(!landmarks)return status("Face not detected. Centre your face and retry.",true);
-  const sample=readFace(landmarks,result);
-  if(!sample)return status("Face landmarks unavailable. Try again.",true);
-  S.headSmooth={...sample.head};S.headBaseline={...sample.head};
-  S.eyeSmooth=sample.eye?{...sample.eye}:null;
-  S.eyeBaseline=sample.eye?{...sample.eye}:null;
+  const heads=[],eyes=[];
+  for(let i=0;i<10;i++){
+   await new Promise(resolve=>setTimeout(resolve,45));
+   if(!S.active||!S.landmarker)throw Error("Tracking stopped during calibration.");
+   const result=S.landmarker.detectForVideo(video,performance.now());
+   const sample=readFace(result.faceLandmarks?.[0],result);
+   if(sample){heads.push(sample.head);if(sample.eye)eyes.push(sample.eye)}
+  }
+  if(heads.length<5)throw Error("Face not detected steadily. Improve lighting, centre your face and retry.");
+  const average=items=>({x:items.reduce((sum,p)=>sum+p.x,0)/items.length,y:items.reduce((sum,p)=>sum+p.y,0)/items.length});
+  S.headBaseline=average(heads);S.headSmooth={...S.headBaseline};
+  S.eyeBaseline=eyes.length>=5?average(eyes):null;S.eyeSmooth=S.eyeBaseline?{...S.eyeBaseline}:null;
   S.targetX=S.x=innerWidth/2;S.targetY=S.y=innerHeight/2;
-  S.lastX=S.lastY=null;S.stillSince=0;draw();
-  status("Centre calibrated. Move your head right to move the pointer right.");
- }catch(error){status("Calibration failed: "+String(error?.message||error).slice(0,100),true)}
+  S.lastX=S.lastY=null;S.stillSince=0;S.closedAt=0;draw();
+  status(eyes.length>=5?"Centre calibrated from 10 frames. Head and eye tracking ready.":"Head tracking calibrated. Eye landmarks unavailable; use head mode.",false);
+ }catch(error){status("Calibration failed: "+String(error?.message||error).slice(0,120),true)}
+ finally{button.disabled=!S.active}
 }
 $("gaze-start").addEventListener("click",start);
 $("gaze-stop").addEventListener("click",()=>stop());
