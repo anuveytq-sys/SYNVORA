@@ -155,7 +155,7 @@
   <label class="check-label"><input type="checkbox" id="gaze-dwell"><span>Dwell scrolling (only after pointer becomes still)</span></label>
   <label class="check-label"><input type="checkbox" id="gaze-edge"><span>Top/bottom edge auto-scroll</span></label>
   <label class="check-label"><input type="checkbox" id="gaze-map"><span>Move OpenStreetMap with gaze/head</span></label>
-  <label for="gaze-dwell-time">Dwell delay <output id="gaze-dwell-value">1.2 s</output></label><input id="gaze-dwell-time" type="range" min="600" max="2500" step="100" value="1200">
+  <label for="gaze-dwell-time">Dwell delay <output id="gaze-dwell-value">0.45 s</output></label><input id="gaze-dwell-time" type="range" min="250" max="1200" step="50" value="450">
   <label for="gaze-speed">Pointer sensitivity <output id="gaze-speed-value">1.0×</output></label><input id="gaze-speed" type="range" min="60" max="160" step="5" value="100">
   <p class="muted small" id="gaze-status" role="status" aria-live="polite">Tracking is off. Use a stable camera position and calibrate before use.</p>
   <p class="muted small">Blink clicks can be affected by natural blinks and lighting. Keep physical keyboard/touch controls available. Eye tracking is an experimental accessibility input, not a medical or diagnostic tool.</p>
@@ -172,5 +172,5 @@
  </section>
 </aside>
 <div id="gaze-cursor" aria-hidden="true" hidden><span></span></div>
-<script defer src="./gaze-control.js?v=stage6-gaze-cosmosim-r1"></script>
+<script defer src="./gaze-control.js?v=stage6-gaze-cosmosim-r2"></script>
 <footer><span>SYNVORA · ECHO · STAGE 01</span><span data-i18n="safetyFooter">Assistive information only. Never rely on this app to confirm that a route is safe.</span></footer></body></html>
