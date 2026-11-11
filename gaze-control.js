@@ -112,7 +112,7 @@ function scrollableAtPointer(){
  for(const node of document.elementsFromPoint(S.x,S.y)){
   if(!node||node===cursor)continue;
   let current=node;
-  while(current&&current!==document.body){
+  while(current&&current!==document.documentElement){
    if(current instanceof HTMLElement){
     const css=getComputedStyle(current);
     if(/(auto|scroll|overlay)/.test(css.overflowY)&&current.scrollHeight>current.clientHeight+8)return current;
@@ -124,23 +124,30 @@ function scrollableAtPointer(){
 }
 function dwellScroll(now,dx,dy){
  if(!$("gaze-dwell").checked){S.stillSince=0;return}
- if(Math.hypot(dx,dy)>2.2){S.stillSince=0;return}
+ if(Math.hypot(dx,dy)>3.2){S.stillSince=0;return}
  if(!S.stillSince){S.stillSince=now;return}
- const delay=Number($("gaze-dwell-time").value)||700;
- if(now-S.stillSince<delay||now-S.lastDwell<120)return;
+ const delay=Number($("gaze-dwell-time").value)||450;
+ if(now-S.stillSince<delay||now-S.lastDwell<70)return;
  const box=scrollableAtPointer();
  if(box){
-  const rect=box.getBoundingClientRect(),edge=Math.min(76,Math.max(34,rect.height*.2));
+  const rect=box.getBoundingClientRect(),edge=Math.min(110,Math.max(48,rect.height*.24));
   let direction=0;
   if(S.y<=rect.top+edge&&box.scrollTop>0)direction=-1;
   else if(S.y>=rect.bottom-edge&&box.scrollTop+box.clientHeight<box.scrollHeight-1)direction=1;
   if(!direction){S.stillSince=now;return}
-  box.scrollTop=clamp(box.scrollTop+direction*34,0,box.scrollHeight-box.clientHeight);
+  const proximity=direction<0?(rect.top+edge-S.y)/edge:(S.y-(rect.bottom-edge))/edge;
+  const step=clamp(38+proximity*54,38,92);
+  box.scrollTop=clamp(box.scrollTop+direction*step,0,box.scrollHeight-box.clientHeight);
   S.lastDwell=now;
  }else{
-  const edge=54,direction=S.y<edge?-1:S.y>innerHeight-edge?1:0;
+  const edge=Math.min(120,Math.max(76,innerHeight*.14));
+  let direction=0,proximity=0;
+  if(S.y<edge){direction=-1;proximity=(edge-S.y)/edge}
+  else if(S.y>innerHeight-edge){direction=1;proximity=(S.y-(innerHeight-edge))/edge}
   if(!direction){S.stillSince=now;return}
-  window.scrollBy({top:direction*30,behavior:"auto"});S.lastDwell=now;
+  const step=clamp(42+proximity*78,42,120);
+  window.scrollBy({top:direction*step,behavior:"auto"});
+  S.lastDwell=now;
  }
 }
 function updateBlink(now,closed){
