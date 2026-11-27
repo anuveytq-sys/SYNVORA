@@ -211,3 +211,16 @@ body.high-contrast .panel-assembly-cursor .cursor-tag{background:#000;border:2px
 #surface-vision-empty{padding:45px 10px;text-align:center;color:#91b6c8;letter-spacing:.12em;font-size:.8rem}
 .surface-vision-panel .detection-list{max-height:170px;overflow:auto}
 @media(max-width:620px){.journey-form{grid-template-columns:1fr 1fr}.journey-form input{grid-column:1/-1}.emergency-quick{grid-template-columns:1fr}.emergency-contact-row{grid-template-columns:1fr}}
+
+/* SYNVORA ECHO OCR workspace */
+.ocr-workspace{min-width:0}
+.ocr-toolbar,.ocr-actions{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin:12px 0}
+.ocr-toolbar label{display:flex;flex-direction:column;gap:6px;color:var(--muted,#9eb2c9);font-size:.82rem}
+.ocr-toolbar select{min-width:170px}
+.ocr-toolbar button,.ocr-actions button{min-height:40px}
+.ocr-output{white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;padding:14px;border:1px solid var(--line,rgba(130,170,210,.2));border-radius:12px;background:rgba(2,10,22,.55);font:inherit;line-height:1.65;color:var(--text,#eaf3ff);user-select:text}
+.ocr-cues{margin-top:12px;padding:12px;border:1px solid var(--line,rgba(130,170,210,.2));border-radius:12px;background:rgba(20,45,70,.22)}
+.ocr-cues h4{margin:0 0 8px}
+.ocr-cues p{white-space:pre-line}
+#ocr-live-capture:disabled,#ocr-copy:disabled,#ocr-download:disabled,#read-text:disabled{opacity:.48;cursor:not-allowed}
+@media(max-width:600px){.ocr-toolbar,.ocr-actions{align-items:stretch}.ocr-toolbar>* ,.ocr-actions>*{width:100%}.ocr-toolbar label select{width:100%}}
