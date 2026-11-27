@@ -26,7 +26,7 @@ function init(){
   setStatus("Camera frame captured locally. Preparing OCR…","CAPTURED");
  });
  $("camera-start").addEventListener("click",()=>setTimeout(()=>{$("ocr-live-capture").disabled=$("capture").disabled;},0));
- $("capture").addEventListener("click",()=>setTimeout(()=>{$("ocr-live-capture").disabled=$("capture").disabled;},0));
+ const captureObserver=new MutationObserver(()=>{$("ocr-live-capture").disabled=$("capture").disabled});captureObserver.observe($("capture"),{attributes:true,attributeFilter:["disabled"]});
  $("image-upload").addEventListener("change",()=>setTimeout(()=>{$("ocr-live-capture").disabled=$("capture").disabled;},100));
  $("ocr-copy").addEventListener("click",async()=>{const text=$("ocr-output").textContent.replace(/\n\nRecognition confidence:.*$/s,"").trim();if(!text)return;try{await navigator.clipboard.writeText(text);setStatus("Extracted text copied to clipboard.","COPIED")}catch(e){setStatus("Clipboard unavailable. Select the result and copy it manually.","COPY UNAVAILABLE")}});
  $("ocr-download").addEventListener("click",()=>{const text=$("ocr-output").textContent.replace(/\n\nRecognition confidence:.*$/s,"").trim();if(!text)return;const url=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"})),a=document.createElement("a");a.href=url;a.download="synvora-ocr.txt";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setStatus("OCR text download prepared.","DOWNLOADING")});
