@@ -86,7 +86,7 @@ async function worker(){
  if(S.ocrWorker)return S.ocrWorker;
  await window.SYNVORA_MODELS?.activate("ocr");
  await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js",()=>!!window.Tesseract);
- S.ocrWorker=await Tesseract.createWorker("eng+hin",1,{langPath:"https://tessdata.projectnaptha.com/4.0.0",logger:m=>{if(m.status==="recognizing text")$("ocr-output").textContent="OCR "+Math.round((m.progress||0)*100)+"%"}});
+ S.ocrWorker=await Tesseract.createWorker(window.SYNVORA_OCR_LANGUAGE||"eng+hin",1,{langPath:"https://tessdata.projectnaptha.com/4.0.0",logger:m=>{if(m.status==="recognizing text"){$("ocr-output").textContent="OCR "+Math.round((m.progress||0)*100)+"%";if($("ocr-status"))$("ocr-status").textContent="Recognizing text · "+Math.round((m.progress||0)*100)+"%"}}});
  try{await S.ocrWorker.setParameters({tessedit_pageseg_mode:"6",preserve_interword_spaces:"1"})}catch(e){}
  return S.ocrWorker;
 }
@@ -103,6 +103,8 @@ $("run-ocr").addEventListener("click",async()=>{
 });
 $("read-text").addEventListener("click",()=>speak(S.text||t("readNone")));
 $("question-form").addEventListener("submit",e=>{e.preventDefault();const q=$("image-question").value.trim().toLowerCase();if(!S.image){$("answer").textContent=t("needImage");return}if(/text|read|written|sign|word|लिख|पढ़|शब्द|बोर्ड/.test(q))$("answer").textContent=S.text?t("textAnswer")+S.text:t("noText");else if(/stairs|steps|ramp|door|exit|obstacle|safe|danger|path|route|सीढ़|रैंप|दरवाज़|दरवाज|रास्त|बाधा|निकास/.test(q)){if(!S.accessibilityScanDone){$("answer").textContent=t("runAccessibilityFirst")}else{const hits=S.accessibilityResults.filter(d=>q.split(/[^a-z]+/).some(w=>w.length>2&&d.label.toLowerCase().includes(w))||(/stairs|steps|सीढ़/.test(q)&&/stairs|staircase|steps/.test(d.label))||(/ramp|रैंप/.test(q)&&/ramp/.test(d.label))||(/door|दरवाज़|दरवाज/.test(q)&&/door/.test(d.label))||(/obstacle|बाधा/.test(q)&&/obstacle|barrier|pothole|curb/.test(d.label)));$("answer").textContent=hits.length?t("candidateMatches")+" "+hits.map(d=>d.label+" ("+Math.round(d.score*100)+"%)").join(", ")+". "+t("uncertain"):t("noCandidateNotProof")}}else if(S.detections.length)$("answer").textContent=t("objectAnswer")+S.detections.map(d=>d.class).join(", ")+". "+t("uncertain");else $("answer").textContent=t("notEnough")});
+window.addEventListener("synvora:ocr-language-change",async()=>{if(S.ocrWorker){try{await S.ocrWorker.terminate()}catch(e){}S.ocrWorker=null}S.text="";if($("ocr-output"))$("ocr-output").textContent="Language changed. Run OCR again.";});
+window.addEventListener("synvora:ocr-clear",()=>{S.text="";});
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 $("listen").addEventListener("click",()=>{if(!SR){$("voice-status").textContent=t("speechUnsupported");return}try{if(S.recognition)S.recognition.abort();const r=new SR();S.recognition=r;r.lang=S.lang;r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>$("voice-status").textContent=t("listening");r.onresult=e=>{$("image-question").value=e.results[0][0].transcript;$("question-form").requestSubmit()};r.onerror=e=>$("voice-status").textContent=t("voiceError")+e.error;r.onend=()=>S.recognition=null;r.start()}catch(e){$("voice-status").textContent=t("speechUnsupported")}});
 $("stop-speaking").addEventListener("click",()=>{if(window.speechSynthesis)speechSynthesis.cancel();if(S.recognition)S.recognition.abort();$("voice-status").textContent="Audio stopped"});
