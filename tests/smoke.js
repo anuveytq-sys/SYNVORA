@@ -17,3 +17,5 @@ assert.ok(gaze.includes("heads.length<5")&&gaze.includes("now-S.lastDwell<70")&&
 assert.ok(!html.includes('id="gaze-dwell" checked')&&!html.includes('id="gaze-edge" checked')&&!html.includes('id="gaze-map" checked'),"Automatic scrolling must default OFF");
 assert.ok(css.includes("#gaze-cursor{width:14px"),"Cursor size should remain compact");
 assert.ok(gaze.includes("now-S.lastDwell<70")&&gaze.includes("innerHeight*.14")&&gaze.includes("direction*step"),"Responsive faster dwell scrolling is missing");
+
+const ocr=fs.readFileSync("ocr-upgrade.js","utf8");for(const token of ["SYNVORA_OCR_LANGUAGE","synvora:image-ready","classify","clipboard.writeText","synvora-ocr.txt","MutationObserver"])assert.ok(ocr.includes(token),"Missing OCR upgrade capability: "+token);console.log("SYNVORA OCR upgrade smoke checks passed.");
